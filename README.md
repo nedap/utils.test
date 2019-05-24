@@ -1,4 +1,4 @@
-# utils.test
+# utils.test [![CircleCI](https://circleci.com/gh/nedap/utils.test.svg?style=svg&circle-token=40d5b1ddb5290559200d8569aeeba8ef70ef1883)](https://circleci.com/gh/nedap/utils.test)
 
 (In short: What does the library do?)
 
