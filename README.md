@@ -1,10 +1,13 @@
 # utils.test [![CircleCI](https://circleci.com/gh/nedap/utils.test.svg?style=svg&circle-token=40d5b1ddb5290559200d8569aeeba8ef70ef1883)](https://circleci.com/gh/nedap/utils.test)
 
-(In short: What does the library do?)
+A collection of test helpers.
 
 ## Synopsis
 
-(Show off its main functions so the reader can get a basic idea)
+`nedap.utils.test.api/simplify` allows you to transform complex data for ease in comparison in tests. 
+It transforms `Sequential` collections into sets and `IPersistentMap` into plain maps.
+
+The [api test](test/unit/nedap/utils/test/api.cljc) shows a couple examples with records.
 
 ## Installation
 
@@ -14,7 +17,8 @@
 
 ## ns organisation
 
-(how is the project organised? Which are its public parts?)
+There is exactly 1 namespace meant for public consumption:
+ - nedap.utils.test.api
 
 ## Documentation
 
