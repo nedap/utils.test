@@ -24,7 +24,7 @@
                                     (if-not #?(:clj  (instance? IMeta form)
                                                :cljs (satisfies? IMeta form))
                                       form
-                                      (if-let [metadata-map (meta form)]
+                                      (if-let [metadata-map (-> form meta not-empty)]
                                         [(walk/postwalk walker metadata-map)
                                          form]
                                         form)))))))
