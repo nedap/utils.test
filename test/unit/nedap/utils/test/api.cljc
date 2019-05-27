@@ -25,3 +25,69 @@
       (->School [(->Student "Luna Lovegood")
                  (->Student "Neville Longbottom")
                  (->Student "Harry Potter")]))))
+
+(deftest meta=
+  (testing "Basic equality is analog to that of `clojure.core/=`"
+    (are [a b] (testing [:= a b]
+                 (= (sut/meta= a b)
+                    (= a b)))
+      "a"     "a"
+      "a"     "b"
+      1       1
+      1       2
+      [1 2 3] [1 2 3]
+      [1 2 3] [1 3 2]
+      []      []
+      []      {}
+      nil     1
+      nil     nil
+      {}      {}
+      {1 1}   {1 1}
+      {1 1}   {1 2}))
+
+  (testing "Metadata-wise equality is different to that of `clojure.core/=`"
+    (are [a b] (testing [:= a b]
+                 (not= (sut/meta= a b)
+                       (= a b)))
+      []   ^:a []
+      [[]] [^:a []]))
+
+  (testing "Metadata-wise equality"
+    (are [a b expectation] (testing [:= a b]
+                             (= expectation
+                                (sut/meta= a b)))
+
+      []           []           true
+      []           ^:a []       false
+      [[]]         [^:a []]     false
+      [1 2 ^:a []] [1 2 ^:a []] true
+      [1 2 ^:a []] [1 2 ^:b []] false))
+
+  (testing "Medatata metadata (and so on, recursively) also accounts for equality"
+    (are [a b expectation] (testing [:= a b]
+                             (= expectation
+                                (sut/meta= a b)))
+
+      ^{:thing ^:other []} []
+      ^{:thing ^:other []} []
+      true
+
+      ^{:thing ^:other []} []
+      ^{:thing ^:OTHER []} []
+      false
+
+      ^{:thing ^{:other ^:final []} []} []
+      ^{:thing ^{:other ^:final []} []} []
+      true
+
+      ^{:thing ^{:other ^:final []} []} []
+      ^{:thing ^{:other ^:FINAL []} []} []
+      false
+
+      [^{:thing ^{:other ^:final []} []} []]
+      [^{:thing ^{:other ^:final []} []} []]
+      true
+
+      [^{:thing ^{:other ^:final []} []} []]
+      [^{:thing ^{:other ^:FINAL []} []} []]
+      false)))

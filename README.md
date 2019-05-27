@@ -4,10 +4,9 @@ A collection of test helpers.
 
 ## Synopsis
 
-`nedap.utils.test.api/simple=` allows you to compare similar structure disregarding possible order.
-It transforms `Sequential` collections into sets and `IPersistentMap` into plain maps.
+* `nedap.utils.test.api/simple=` allows you to compare similar structure disregarding possible order and type difference
 
-The [api test](test/unit/nedap/utils/test/api.cljc) shows a couple examples with records.
+* `nedap.utils.test.api/meta=` compares both objects and their metadata, recursively. 
 
 ## Installation
 
@@ -22,7 +21,9 @@ There is exactly 1 namespace meant for public consumption:
 
 ## Documentation
 
-Please browse the public namespaces, which are documented, speced and tested.
+Please browse the public namespaces, which are documented and tested.
+
+You can find examples in the [api test](test/unit/nedap/utils/test/api.cljc).
 
 ## License
 
