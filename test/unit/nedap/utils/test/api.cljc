@@ -43,14 +43,19 @@
       nil     nil
       {}      {}
       {1 1}   {1 1}
-      {1 1}   {1 2}))
+      {1 1}   {1 2}
+      'a      'a
+      'a      'b
+      :a      :a
+      :a      :b))
 
   (testing "Metadata-wise equality is different to that of `clojure.core/=`"
     (are [a b] (testing [:= a b]
                  (not= (sut/meta= a b)
                        (= a b)))
       []   ^:a []
-      [[]] [^:a []]))
+      [[]] [^:a []]
+      'a   (with-meta 'a {:a true})))
 
   (testing "Metadata-wise equality"
     (are [a b expectation] (testing [:= a b]
