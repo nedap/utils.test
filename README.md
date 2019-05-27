@@ -9,6 +9,12 @@ It transforms `Sequential` collections into sets and `IPersistentMap` into plain
 
 The [api test](test/unit/nedap/utils/test/api.cljc) shows a couple examples with records.
 
+Loading `nedap.utils.test.api` defines a method for `clojure.test/assert-expr` to assert failing specs.
+Can be used like just like [`thrown?`](https://clojuredocs.org/clojure.test/is#example-542692d7c026201cdc327116)
+```clojure
+(is (spec-violated? ::string (check! ::string 1234)))
+```
+
 ## Installation
 
 ```clojure

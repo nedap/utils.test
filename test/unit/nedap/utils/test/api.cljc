@@ -1,8 +1,16 @@
 (ns unit.nedap.utils.test.api
-  (:require
-   #?(:clj  [clojure.test :refer [deftest testing are is use-fixtures]]
-      :cljs [cljs.test :refer-macros [deftest testing is are] :refer [use-fixtures]])
-   [nedap.utils.test.api :as sut]))
+   #?(:clj  (:require
+             [clojure.test :refer [deftest testing are is]]
+             [clojure.spec.alpha :as s]
+             [nedap.utils.test.api :as sut]
+             [nedap.utils.speced :as speced]
+             [nedap.utils.spec.api :refer [check!]])
+      :cljs (:require
+             [cljs.test :refer-macros [deftest testing is are]]
+             [nedap.utils.speced :as speced]
+             [nedap.utils.spec.api :refer-macros [check!]]
+             [nedap.utils.test.api :as sut]
+             [cljs.spec.alpha :as s])))
 
 (defrecord Student  [name])
 (defrecord School [students])
@@ -25,3 +33,20 @@
       (->School [(->Student "Luna Lovegood")
                  (->Student "Neville Longbottom")
                  (->Student "Harry Potter")]))))
+
+
+(s/def ::number number?)
+
+(speced/defn accepts-number [^::number x] x)
+(speced/defn ^::number returns-number [x] x)
+
+(deftest spec-violated?
+  (are [form spec] (spec-violated? spec form)
+    (check! string? 123)    'string?
+    (check! ::number "123") ::number
+    (accepts-number "1234") ::number
+    (returns-number "1234") ::number)
+
+  (testing "No exception swallowing"
+    (is (thrown? IllegalArgumentException
+                 (throw (IllegalArgumentException. "Wat"))))))
