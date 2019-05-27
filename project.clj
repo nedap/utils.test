@@ -1,4 +1,4 @@
-(defproject com.nedap.staffing-solutions/utils.test "0.1.0-alpha1"
+(defproject com.nedap.staffing-solutions/utils.test "1.0.0"
   ;; Please keep the dependencies sorted a-z.
   :dependencies [[com.nedap.staffing-solutions/utils.modular "0.3.0"]
                  [com.nedap.staffing-solutions/utils.spec "0.6.2"]
