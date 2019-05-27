@@ -4,7 +4,7 @@ A collection of test helpers.
 
 ## Synopsis
 
-`nedap.utils.test.api/simplify` allows you to transform complex data for ease in comparison in tests. 
+`nedap.utils.test.api/simple=` allows you to compare similar structure disregarding possible order.
 It transforms `Sequential` collections into sets and `IPersistentMap` into plain maps.
 
 The [api test](test/unit/nedap/utils/test/api.cljc) shows a couple examples with records.
@@ -18,7 +18,7 @@ The [api test](test/unit/nedap/utils/test/api.cljc) shows a couple examples with
 ## ns organisation
 
 There is exactly 1 namespace meant for public consumption:
- - nedap.utils.test.api
+ - `nedap.utils.test.api`
 
 ## Documentation
 

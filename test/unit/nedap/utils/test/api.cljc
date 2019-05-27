@@ -4,46 +4,24 @@
       :cljs [cljs.test :refer-macros [deftest testing is are] :refer [use-fixtures]])
    [nedap.utils.test.api :as sut]))
 
-(deftest simplify
-  (are [input expected] (= expected
-                           (sut/simplify input))
-    nil
-    nil
-
-    [:a :b :c]
-    #{:c :b :a}
-
-    [:a :b :b :c]
-    #{:a :b :c}
-
-    {:key [:a :b :c]}
-    {:key #{:a :c :b}}
-
-    {:key :value}
-    {:key :value}
-
-    {:nested {:key [:value]}}
-    {:nested {:key #{:value}}}
-
-    {:nested {:key :value}}
-    {:nested {:key :value}}))
-
 (defrecord Student  [name])
 (defrecord School [students])
 
-(deftest record-comparing
-  (let [data     {:students #{{:name "Luna Lovegood"}
-                              {:name "Neville Longbottom"}
-                              {:name "Harry Potter"}}}
-        hogwarts (->School [(->Student "Luna Lovegood")
-                            (->Student "Neville Longbottom")
-                            (->Student "Harry Potter")])
-        simplified (sut/simplify hogwarts)]
+(deftest =simple
+  (testing "Assert behaviour of simple="
+    (are [a b] (sut/simple= a b)
+      [:a :b :b :c]
+      #{:a :b :c}
 
-    (testing "record comparison"
-      (is (not= data hogwarts))
-      (is (= data simplified)))
+      {:key [:c :b :a]}
+      {:key #{:a :c :b}}
 
-    (testing "partial matches"
-      (is (:students simplified)
-          {:name "Harry Potter"}))))
+      {:nested {:key [:value :other]}}
+      {:nested {:key #{:other :value}}}
+
+      {:students #{{:name "Luna Lovegood"}
+                   {:name "Neville Longbottom"}
+                   {:name "Harry Potter"}}}
+      (->School [(->Student "Luna Lovegood")
+                 (->Student "Neville Longbottom")
+                 (->Student "Harry Potter")]))))
