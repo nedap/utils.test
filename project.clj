@@ -1,10 +1,6 @@
 (defproject com.nedap.staffing-solutions/utils.test "0.1.0-alpha1"
   ;; Please keep the dependencies sorted a-z.
-  :dependencies [[com.nedap.staffing-solutions/utils.modular "0.3.0"]
-                 [com.nedap.staffing-solutions/utils.spec "0.6.2"]
-                 [com.taoensso/timbre "4.10.0"]
-                 [org.clojure/clojure "1.10.0"]
-                 [org.clojure/test.check "0.10.0-alpha3"]]
+  :dependencies [[org.clojure/clojure "1.10.0"]]
 
   :description "utils.test"
 
