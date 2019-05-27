@@ -13,6 +13,9 @@
     [:a :b :c]
     #{:c :b :a}
 
+    [:a :b :b :c]
+    #{:a :b :c}
+
     {:key [:a :b :c]}
     {:key #{:a :c :b}}
 

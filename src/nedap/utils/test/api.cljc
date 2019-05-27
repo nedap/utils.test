@@ -4,7 +4,9 @@
    [nedap.utils.speced :as speced]))
 
 (speced/defn ^any? simplify
-  "Transforms records into maps and Sequential collections into sets, identity otherwise."
+  "Transforms records into maps and Sequential collections into sets, identity otherwise.
+
+  note: this will remove duplicates"
   [^any? val]
   (walk/postwalk
    (fn [node]
