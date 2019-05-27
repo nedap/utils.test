@@ -7,7 +7,7 @@
 (defrecord Student  [name])
 (defrecord School [students])
 
-(deftest =simple
+(deftest simple=
   (testing "Assert behaviour of simple="
     (are [a b] (sut/simple= a b)
       [:a :b :b :c]
