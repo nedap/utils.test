@@ -4,7 +4,7 @@ A collection of test helpers.
 
 ## Synopsis
 
-* `nedap.utils.test.api/simple=` allows you to compare similar structure disregarding possible order and type difference
+* `nedap.utils.test.api/simple=` allows you to compare similar structure, disregarding possible order and type differences.
 
 * `nedap.utils.test.api/meta=` compares both objects and their metadata, recursively. 
 
