@@ -56,7 +56,7 @@ jobs:
         name: 'Run node.js tests'
         command: node target/out/tests.js
 
-  jfrog:
+  deploy:
     docker:
       - image: circleci/clojure:lein-2.8.1-node
 
@@ -66,12 +66,16 @@ jobs:
       - run:
           name: import GPG key
           command: echo -e "$GPG_KEY" | gpg --import
-          
+
       - checkout
 
       - run:
           name: release to JFrog
           command: lein deploy
+
+      - run:
+          name: release to Clojars
+          command: lein deploy clojars
 
 workflows:
   version: 2
@@ -86,9 +90,9 @@ workflows:
               only: /^v\d+\.\d+\.\d+(-[A-Z]*)*$/
 
 
-      - jfrog:
+      - deploy:
           context: JFrog
-          requires: 
+          requires:
             - build
           filters:
             branches:
