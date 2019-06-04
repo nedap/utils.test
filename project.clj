@@ -1,4 +1,4 @@
-(defproject com.nedap.staffing-solutions/utils.test "1.0.0"
+(defproject com.nedap.staffing-solutions/utils.test "1.1.0"
   ;; Please keep the dependencies sorted a-z.
   :dependencies [[org.clojure/clojure "1.10.0"]]
 
