@@ -11,7 +11,7 @@
   :license {:name "EPL-2.0"
             :url  "https://www.eclipse.org/legal/epl-2.0/"}
 
-  :signing {:gpg-key "servicedesk-PEP@nedap.com"}
+  :signing {:gpg-key "releases-staffingsolutions@nedap.com"}
 
   :repositories {"releases" {:url      "https://nedap.jfrog.io/nedap/staffing-solutions/"
                              :username :env/artifactory_user

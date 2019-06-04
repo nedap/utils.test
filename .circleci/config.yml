@@ -65,7 +65,7 @@ jobs:
     steps:
       - run:
           name: import GPG key
-          command: echo -e "$GPG_KEY" | gpg --import
+          command: echo -e "$GPG_KEY_V2" | gpg --import
 
       - checkout
 
