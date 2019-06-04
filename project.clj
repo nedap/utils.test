@@ -1,4 +1,4 @@
-(defproject com.nedap.staffing-solutions/utils.test "1.1.0"
+(defproject com.nedap.staffing-solutions/utils.test "1.1.1"
   ;; Please keep the dependencies sorted a-z.
   :dependencies [[org.clojure/clojure "1.10.0"]]
 
@@ -11,13 +11,15 @@
   :license {:name "EPL-2.0"
             :url  "https://www.eclipse.org/legal/epl-2.0/"}
 
-  :signing {:gpg-key "servicedesk-PEP@nedap.com"}
+  :signing {:gpg-key "releases-staffingsolutions@nedap.com"}
 
   :repositories {"releases" {:url      "https://nedap.jfrog.io/nedap/staffing-solutions/"
                              :username :env/artifactory_user
                              :password :env/artifactory_pass}}
 
-  :deploy-repositories [["releases" {:url "https://nedap.jfrog.io/nedap/staffing-solutions/"}]]
+  :deploy-repositories {"clojars" {:url "https://clojars.org/repo"
+                                    :username :env/clojars_user
+                                    :password :env/clojars_pass}}
 
   :repository-auth {#"https://nedap.jfrog\.io/nedap/staffing-solutions/"
                     {:username :env/artifactory_user
