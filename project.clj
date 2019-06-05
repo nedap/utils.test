@@ -34,7 +34,6 @@
   :plugins [[lein-cljsbuild "1.1.7"]]
 
   ;; Please don't add `:hooks [leiningen.cljsbuild]`. It can silently skip running the JS suite on `lein test`.
-  ;; It also interferes with Cloverage.
 
   :cljsbuild {:builds {"test" {:source-paths ["src" "test"]
                                :compiler     {:main          nedap.utils.test.test-runner
@@ -50,7 +49,6 @@
                                        [lambdaisland/deep-diff "0.0-29"]
                                        [org.clojure/tools.namespace "0.3.0-alpha4"]
                                        [org.clojure/tools.reader "1.1.1" #_"formatting-stack needs it"]]
-                        :plugins      [[lein-cloverage "1.0.13"]]
                         :source-paths ["dev" "test"]}
 
              :provided {:dependencies [[org.clojure/clojurescript "1.10.520"]]}})
