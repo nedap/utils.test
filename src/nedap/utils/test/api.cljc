@@ -1,9 +1,8 @@
 (ns nedap.utils.test.api
   (:require
-   [nedap.utils.test.impl :as impl]
-   [clojure.walk :as walk])
-  #?(:clj (:import
-           (clojure.lang IMeta))))
+   [clojure.walk :as walk]
+   [nedap.utils.test.impl :as impl])
+  #?(:clj (:import (clojure.lang IMeta))))
 
 (defn simple=
   "Check whether all `vals` have similar structure disregarding possible order
@@ -29,3 +28,13 @@
                                          form]
                                         form)))))))
        (apply =)))
+
+(defn gensym=
+  "Do all `xs` equal, when deeming any contained gensyms unconditionally equal?
+
+  Adequate for when the presence of gensyms would hinder a comparison."
+  [& xs]
+  {:post [(boolean? %)]}
+  (letfn [(r [tree]
+            (walk/postwalk impl/replace-gensyms tree))]
+    (->> xs (map r) (apply =))))

@@ -97,3 +97,17 @@
       [^{:thing ^{:other ^:final []} []} []]
       [^{:thing ^{:other ^:FINAL []} []} []]
       false)))
+
+(deftest gensym=
+  (testing "Equality"
+    (are [a b] (sut/gensym= a b)
+      1                1
+      [1 [2]]          [1 [2]]
+      (gensym)         (gensym)
+      [[1 (gensym) 2]] [[1 (gensym) 2]]))
+
+  (testing "Inequality"
+    (are [a b] (not (sut/gensym= a b))
+      (gensym)         42
+      (gensym)         nil
+      [[1 (gensym) 2]] [[1 (gensym) 3]])))
