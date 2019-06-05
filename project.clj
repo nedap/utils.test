@@ -17,15 +17,19 @@
                              :username :env/artifactory_user
                              :password :env/artifactory_pass}}
 
-  :deploy-repositories {"clojars" {:url "https://clojars.org/repo"
-                                    :username :env/clojars_user
-                                    :password :env/clojars_pass}}
+  :deploy-repositories {"clojars" {:url      "https://clojars.org/repo"
+                                   :username :env/clojars_user
+                                   :password :env/clojars_pass}}
 
   :repository-auth {#"https://nedap.jfrog\.io/nedap/staffing-solutions/"
                     {:username :env/artifactory_user
                      :password :env/artifactory_pass}}
 
   :target-path "target/%s"
+
+  :repl-options {:init-ns dev}
+
+  :monkeypatch-clojure-test false
 
   :plugins [[lein-cljsbuild "1.1.7"]]
 
@@ -39,6 +43,14 @@
                                               :target        :nodejs
                                               :optimizations :none}}}}
 
-  :profiles {:dev      {:plugins [[lein-cloverage "1.0.13"]]}
+  :profiles {:dev      {:dependencies [[cider/cider-nrepl "0.16.0" #_"formatting-stack needs it"]
+                                       [com.clojure-goes-fast/clj-java-decompiler "0.2.1"]
+                                       [criterium "0.4.4"]
+                                       [formatting-stack "0.18.2"]
+                                       [lambdaisland/deep-diff "0.0-29"]
+                                       [org.clojure/tools.namespace "0.3.0-alpha4"]
+                                       [org.clojure/tools.reader "1.1.1" #_"formatting-stack needs it"]]
+                        :plugins      [[lein-cloverage "1.0.13"]]
+                        :source-paths ["dev" "test"]}
 
              :provided {:dependencies [[org.clojure/clojurescript "1.10.520"]]}})
