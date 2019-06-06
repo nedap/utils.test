@@ -21,6 +21,7 @@
   (if (and (symbol? form)
            ;; some known gensym prefixes that clojure.core uses:
            (or (-> form str (string/starts-with? "G__"))
+               (-> form str (string/starts-with? "p__"))
                (-> form str (string/includes? "__auto__"))))
     ::a-gensym
     form))
