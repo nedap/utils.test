@@ -13,7 +13,7 @@ A collection of test helpers.
 ## Installation
 
 ```clojure
-[com.nedap.staffing-solutions/utils.test "1.2.0"]
+[com.nedap.staffing-solutions/utils.test "1.3.0"]
 ```
 
 ## ns organisation
