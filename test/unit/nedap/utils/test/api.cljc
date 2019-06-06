@@ -1,7 +1,6 @@
 (ns unit.nedap.utils.test.api
   (:require
-   #?(:clj  [clojure.test :refer [deftest testing are is use-fixtures]]
-      :cljs [cljs.test :refer-macros [deftest testing is are] :refer [use-fixtures]])
+   #?(:clj [clojure.test :refer [deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are] :refer [use-fixtures]])
    [nedap.utils.test.api :as sut]))
 
 (defrecord Student  [name])
@@ -97,3 +96,17 @@
       [^{:thing ^{:other ^:final []} []} []]
       [^{:thing ^{:other ^:FINAL []} []} []]
       false)))
+
+(deftest macroexpansion=
+  (testing "Equality"
+    (are [a b] (sut/macroexpansion= a b)
+      1                1
+      [1 [2]]          [1 [2]]
+      (gensym)         (gensym)
+      [[1 (gensym) 2]] [[1 (gensym) 2]]))
+
+  (testing "Inequality"
+    (are [a b] (not (sut/macroexpansion= a b))
+      (gensym)         42
+      (gensym)         nil
+      [[1 (gensym) 2]] [[1 (gensym) 3]])))
