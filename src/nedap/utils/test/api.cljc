@@ -29,7 +29,7 @@
                                         form)))))))
        (apply =)))
 
-(defn gensym=
+(defn macroexpansion=
   "Do all `xs` equal, when deeming any contained gensyms unconditionally equal?
 
   Adequate for when the presence of gensyms would hinder a comparison."

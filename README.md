@@ -8,7 +8,7 @@ A collection of test helpers.
 
 * `nedap.utils.test.api/meta=` compares both objects and their metadata, recursively.
 
-* `nedap.utils.test.api/gensym=` compares objects, deeming any gensyms as equal.
+* `nedap.utils.test.api/macroexpansion=` compares objects, deeming any gensyms as equal.
 
 ## Installation
 
