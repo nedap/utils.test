@@ -110,3 +110,9 @@
       (gensym)         42
       (gensym)         nil
       [[1 (gensym) 2]] [[1 (gensym) 3]])))
+
+#?(:clj
+   (deftest ref-changed?-defmethod
+     (let [a (atom {})]
+       (is (ref-changed? a (swap! a assoc :value 1)))
+       (is (ref-changed? a (swap! a assoc :value 2) :to {:value 2})))))

@@ -45,7 +45,7 @@
   :profiles {:dev      {:dependencies [[cider/cider-nrepl "0.16.0" #_"formatting-stack needs it"]
                                        [com.clojure-goes-fast/clj-java-decompiler "0.2.1"]
                                        [criterium "0.4.4"]
-                                       [formatting-stack "0.18.2"]
+                                       [formatting-stack "0.18.3"]
                                        [lambdaisland/deep-diff "0.0-29"]
                                        [org.clojure/tools.namespace "0.3.0-alpha4"]
                                        [org.clojure/tools.reader "1.1.1" #_"formatting-stack needs it"]]
