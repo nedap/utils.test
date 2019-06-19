@@ -110,3 +110,18 @@
       (gensym)         42
       (gensym)         nil
       [[1 (gensym) 2]] [[1 (gensym) 3]])))
+
+(deftest expect
+  (sut/expect :to-change 0 :from 0 :to 0)
+
+  (let [a (atom 0)]
+    (sut/expect (swap! a inc)
+                :to-change @a
+                :from 0
+                :to 1)
+
+    (sut/expect (swap! a inc)
+                (swap! a inc)
+                :to-change @a
+                :from 1
+                :to 3)))

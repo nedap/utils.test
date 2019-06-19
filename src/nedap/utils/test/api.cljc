@@ -41,6 +41,16 @@
             (walk/postwalk impl/replace-gensyms tree))]
     (->> xs (map r) (apply =))))
 
+(defmacro expect [& forms]
+  "Asserts `to-change` yields `from`, and and yields `to` after evaluating all `forms`.
+
+  `(expect (swap! a inc) :to-change @a :from 1 :to 2)`"
+  (let [{:keys [to-change from to] :as opts} (take-last 6 forms)
+        bodies (drop-last 6 forms)]
+    `(do
+       (clojure.test/is (= ~to-change ~from) "Initial state doesn't match!")
+       ~@bodies)))
+
 (defmacro run-tests
   "Runs all tests for the given namespaces (defaulting to the current namespace if none given),
   printing the results.
