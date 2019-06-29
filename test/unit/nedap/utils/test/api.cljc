@@ -1,7 +1,8 @@
 (ns unit.nedap.utils.test.api
   (:require
    #?(:clj [clojure.test :refer [deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are] :refer [use-fixtures]])
-   [nedap.utils.test.api :as sut]))
+   [nedap.utils.test.api :as sut]
+   [clojure.string :as string]))
 
 (defrecord Student  [name])
 (defrecord School [students])
@@ -125,3 +126,23 @@
                 :to-change @a
                 :from 1
                 :to 3)))
+
+(defn assertion-thrown?
+  [assertion form]
+  (try
+    (eval form)
+    false
+    (catch Exception e
+      (or (string/includes? (ex-message (ex-cause e)) assertion)
+          (throw (ex-cause e))))))
+
+#?(:clj
+   (deftest expect-validation
+     (testing "asserts correct usage"
+       (are [form] (assertion-thrown?
+                    "(spec/valid? :nedap.utils.test.impl/expect-options options)"
+                    form)
+         `(sut/expect :to-tjainge 0 :from 0 :to 1)
+         `(sut/expect :to-change 0 :from 0 :to 1 :extra :value)
+         `(sut/expect :to-change 0 :to 1)
+         `(sut/expect :to-change 0 :from nil :to 1)))))

@@ -1,6 +1,7 @@
 (ns nedap.utils.test.impl
   (:require
-   #?(:cljs [cljs.test])
+   #?(:clj [clojure.test] :cljs [cljs.test])
+   [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [clojure.walk :as walk]))
 
@@ -40,3 +41,26 @@
        (if (cljs.test/successful? summary)
          (set! (.-exitCode js/process) 0)
          (set! (.-exitCode js/process) 1)))))
+
+(spec/def ::to   some?)
+(spec/def ::from some?)
+(spec/def ::to-change some?)
+(spec/def ::expect-options
+  (spec/keys :req-un [::to-change
+                      ::from
+                      ::to]))
+
+(defn expect
+  [bodies {:keys [to-change from to] :as options} clj?]
+  {:pre [(spec/valid? coll? bodies)
+         (spec/valid? ::expect-options options)
+         (spec/valid? boolean? clj?)]}
+  (if clj?
+    `(do
+       (clojure.test/is (= ~to-change ~from) "Initial state doesn't match!")
+       ~@bodies
+       (clojure.test/is (= ~to-change ~to)))
+    `(do
+       (cljs.test/is (= ~to-change ~from) "Initial state doesn't match!")
+       ~@bodies
+       (cljs.test/is (= ~to-change ~to)))))
