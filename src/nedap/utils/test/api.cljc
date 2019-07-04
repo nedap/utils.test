@@ -1,7 +1,6 @@
 (ns nedap.utils.test.api
   (:require
-   #?(:clj  [clojure.test :as test]
-      :cljs [cljs.test :refer [successful?] :as test])
+   #?(:clj [clojure.test] :cljs [cljs.test])
    [clojure.walk :as walk]
    [nedap.utils.test.impl :as impl])
   #?(:clj (:import (clojure.lang IMeta))))
@@ -43,8 +42,19 @@
 
 #?(:cljs
    (do
-    (derive ::exit-code-reporter ::test/default)
-    (defmethod test/report [::exit-code-reporter :end-run-tests] [summary]
-      (if (successful? summary)
+    (derive ::exit-code-reporter :cljs.test/default)
+    (defmethod cljs.test/report [::exit-code-reporter :end-run-tests] [summary]
+      (if (cljs.test/successful? summary)
         (set! (.-exitCode js/process) 0)
         (set! (.-exitCode js/process) 1)))))
+
+(defmacro run-tests
+  "Runs all tests in the given namespaces; prints results.
+  Defaults to current namespace if none given.
+
+  when cljs exit-code is set to non-zero when tests fail"
+  [& namespaces]
+  (let [clj? (-> &env :ns nil?)]
+    (if clj?
+      `(clojure.test/run-tests ~@namespaces)
+      `(cljs.test/run-tests (cljs.test/empty-env ::exit-code-reporter) ~@namespaces))))
