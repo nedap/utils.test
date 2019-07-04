@@ -1,5 +1,7 @@
 (ns nedap.utils.test.api
   (:require
+   #?(:clj  [clojure.test :as test]
+      :cljs [cljs.test :refer [successful?] :as test])
    [clojure.walk :as walk]
    [nedap.utils.test.impl :as impl])
   #?(:clj (:import (clojure.lang IMeta))))
@@ -38,3 +40,11 @@
   (letfn [(r [tree]
             (walk/postwalk impl/replace-gensyms tree))]
     (->> xs (map r) (apply =))))
+
+#?(:cljs
+   (do
+    (derive ::exit-code-reporter ::test/default)
+    (defmethod test/report [::exit-code-reporter :end-run-tests] [summary]
+      (if (successful? summary)
+        (set! (.-exitCode js/process) 0)
+        (set! (.-exitCode js/process) 1)))))

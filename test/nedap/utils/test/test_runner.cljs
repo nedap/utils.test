@@ -1,7 +1,8 @@
 (ns nedap.utils.test.test-runner
   (:require
+   [cljs.test :refer [run-tests] :as test]
    [cljs.nodejs :as nodejs]
-   [cljs.test :refer-macros [run-tests]]
+   [nedap.utils.test.api :as utils.test]
    [unit.nedap.utils.test.api]
    [unit.nedap.utils.test.impl]))
 
@@ -9,6 +10,7 @@
 
 (defn -main []
   (run-tests
+   (test/empty-env ::utils.test/exit-code-reporter)
    'unit.nedap.utils.test.api
    'unit.nedap.utils.test.impl))
 
