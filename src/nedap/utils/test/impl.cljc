@@ -1,5 +1,6 @@
 (ns nedap.utils.test.impl
   (:require
+   #?(:cljs [cljs.test])
    [clojure.string :as string]
    [clojure.walk :as walk]))
 
@@ -25,3 +26,12 @@
                (-> form str (string/includes? "__auto__"))))
     ::a-gensym
     form))
+
+
+#?(:cljs
+   (do
+     (derive ::exit-code-reporter :cljs.test/default)
+     (defmethod cljs.test/report [::exit-code-reporter :end-run-tests] [summary]
+       (if (cljs.test/successful? summary)
+         (set! (.-exitCode js/process) 0)
+         (set! (.-exitCode js/process) 1)))))

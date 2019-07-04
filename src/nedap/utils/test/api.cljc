@@ -40,21 +40,12 @@
             (walk/postwalk impl/replace-gensyms tree))]
     (->> xs (map r) (apply =))))
 
-#?(:cljs
-   (do
-    (derive ::exit-code-reporter :cljs.test/default)
-    (defmethod cljs.test/report [::exit-code-reporter :end-run-tests] [summary]
-      (if (cljs.test/successful? summary)
-        (set! (.-exitCode js/process) 0)
-        (set! (.-exitCode js/process) 1)))))
-
 (defmacro run-tests
   "Runs all tests in the given namespaces; prints results.
   Defaults to current namespace if none given.
 
   when cljs exit-code is set to non-zero when tests fail"
   [& namespaces]
-  (let [clj? (-> &env :ns nil?)]
-    (if clj?
-      `(clojure.test/run-tests ~@namespaces)
-      `(cljs.test/run-tests (cljs.test/empty-env ::exit-code-reporter) ~@namespaces))))
+  (if-let [clj? (-> &env :ns nil?)]
+    `(clojure.test/run-tests ~@namespaces)
+    `(cljs.test/run-tests (cljs.test/empty-env ::impl/exit-code-reporter) ~@namespaces)))
