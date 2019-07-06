@@ -1,5 +1,7 @@
 (ns nedap.utils.test.api
   (:require
+   #?(:clj [clojure.test] :cljs [cljs.test])
+   [clojure.spec.alpha :as spec]
    [clojure.walk :as walk]
    [nedap.utils.test.impl :as impl])
   #?(:clj (:import (clojure.lang IMeta))))
@@ -38,3 +40,15 @@
   (letfn [(r [tree]
             (walk/postwalk impl/replace-gensyms tree))]
     (->> xs (map r) (apply =))))
+
+(defmacro run-tests
+  "Runs all tests for the given namespaces (defaulting to the current namespace if none given),
+  printing the results.
+
+  When invoked under a cljs context, the Unix exit code will be set to 0 or 1, depending on success."
+  [& namespaces]
+  {:pre [(spec/valid? (spec/coll-of impl/quoted-namespace?)
+                      namespaces)]}
+  (if-let [clj? (-> &env :ns nil?)]
+    `(clojure.test/run-tests ~@namespaces)
+    `(cljs.test/run-tests (cljs.test/empty-env ::impl/exit-code-reporter) ~@namespaces)))

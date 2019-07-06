@@ -1,7 +1,7 @@
 (ns nedap.utils.test.test-runner
   (:require
    [cljs.nodejs :as nodejs]
-   [cljs.test :refer-macros [run-tests]]
+   [nedap.utils.test.api :refer-macros [run-tests]]
    [unit.nedap.utils.test.api]
    [unit.nedap.utils.test.impl]))
 
