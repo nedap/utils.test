@@ -10,6 +10,8 @@ A collection of test helpers.
 
 * `nedap.utils.test.api/macroexpansion=` compares objects, deeming any gensyms as equal.
 
+* `nedap.utils.test.api/run-tests` macroexpands to its clojure.test/cljs.test counterpart. It only adds something for the cljs variant: it sets an adequate exit code to the Node process.
+
 ## Installation
 
 ```clojure

@@ -42,10 +42,10 @@
     (->> xs (map r) (apply =))))
 
 (defmacro run-tests
-  "Runs all tests in the given namespaces; prints results.
-  Defaults to current namespace if none given.
+  "Runs all tests for the given namespaces (defaulting to the current namespace if none given),
+  printing the results.
 
-  when cljs exit-code is set to non-zero when tests fail"
+  When invoked under a cljs context, the Unix exit code will be set to 0 or 1, depending on success."
   [& namespaces]
   {:pre [(spec/valid? (spec/coll-of impl/quoted-namespace?)
                       namespaces)]}
