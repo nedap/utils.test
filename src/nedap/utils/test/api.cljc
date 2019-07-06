@@ -1,6 +1,7 @@
 (ns nedap.utils.test.api
   (:require
    #?(:clj [clojure.test] :cljs [cljs.test])
+   [clojure.spec.alpha :as spec]
    [clojure.walk :as walk]
    [nedap.utils.test.impl :as impl])
   #?(:clj (:import (clojure.lang IMeta))))
@@ -46,6 +47,8 @@
 
   when cljs exit-code is set to non-zero when tests fail"
   [& namespaces]
+  {:pre [(spec/valid? (spec/coll-of impl/quoted-namespace?)
+                      namespaces)]}
   (if-let [clj? (-> &env :ns nil?)]
     `(clojure.test/run-tests ~@namespaces)
     `(cljs.test/run-tests (cljs.test/empty-env ::impl/exit-code-reporter) ~@namespaces)))

@@ -27,6 +27,11 @@
     ::a-gensym
     form))
 
+(defn quoted-namespace? [x]
+  (or (symbol? x)
+      (and (sequential? x)
+           (= 'quote (first x))
+           (symbol? (second x)))))
 
 #?(:cljs
    (do
