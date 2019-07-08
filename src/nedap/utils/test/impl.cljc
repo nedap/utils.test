@@ -52,15 +52,11 @@
 
 (defn expect
   [bodies {:keys [to-change from to] :as options} clj?]
-  {:pre [(spec/valid? coll? bodies)
+  {:pre [(spec/valid? (complement empty?) bodies)
          (spec/valid? ::expect-options options)
          (spec/valid? boolean? clj?)]}
-  (if clj?
+  (let [is (if clj? 'clojure.test/is 'cljs.test/is)]
     `(do
-       (clojure.test/is (= ~to-change ~from) "Initial state doesn't match!")
+       (~is (= ~to-change ~from) "Initial state doesn't match!")
        ~@bodies
-       (clojure.test/is (= ~to-change ~to)))
-    `(do
-       (cljs.test/is (= ~to-change ~from) "Initial state doesn't match!")
-       ~@bodies
-       (cljs.test/is (= ~to-change ~to)))))
+       (~is (= ~to-change ~to)))))
