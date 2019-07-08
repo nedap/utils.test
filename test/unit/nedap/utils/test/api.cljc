@@ -125,15 +125,16 @@
                 :from 1
                 :to 3))
 
-  (let [proof (atom [])]
-    (sut/expect
-     (swap! proof conj :body)
-     :to-change (do (swap! proof conj :to-change) true)
-     :from      (do (swap! proof conj :from)      true)
-     :to        (do (swap! proof conj :to)        true))
+  (testing "the macroexpansion evaluates each part exactly once"
+    (let [proof (atom [])]
+      (sut/expect
+       (swap! proof conj :body)
+       :to-change (do (swap! proof conj :to-change) true)
+       :from      (do (swap! proof conj :from)      true)
+       :to        (do (swap! proof conj :to)        true))
 
-    (is (= [:to-change :from :body :to-change :to]
-           @proof))))
+      (is (= [:to-change :from :body :to-change :to]
+             @proof)))))
 
 (defn assertion-thrown?
   [assertion form]
@@ -150,11 +151,11 @@
        (are [form] (assertion-thrown?
                     "(spec/valid? :nedap.utils.test.impl/expect-options options)"
                     form)
-         `(sut/expect 1 :to-tjainge 0 :from 0 :to 1)
-         `(sut/expect 1 :to-change 0 :from 0 :to 1 :extra :value)
-         `(sut/expect 1 :to-change 0 :from nil :to 1)))
+         `(nedap.utils.test.api/expect 1 :to-tjainge 0 :from 0 :to 1)
+         `(nedap.utils.test.api/expect 1 :to-change 0 :from 0 :to 1 :extra :value)
+         `(nedap.utils.test.api/expect 1 :to-change 0 :from nil :to 1)))
 
      (testing "asserts at least one body"
        (is (assertion-thrown?
             "(spec/valid? (complement empty?) bodies)"
-            `(sut/expect :to-change 0 :from 0 :to 0))))))
+            `(nedap.utils.test.api/expect :to-change 0 :from 0 :to 0))))))
