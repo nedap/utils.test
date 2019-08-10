@@ -15,7 +15,7 @@ A collection of test helpers.
 ## Installation
 
 ```clojure
-[com.nedap.staffing-solutions/utils.test "1.4.0"]
+[com.nedap.staffing-solutions/utils.test "1.5.0"]
 ```
 
 ## ns organisation
