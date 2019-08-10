@@ -7,8 +7,9 @@
    [clojure.test :refer [run-all-tests run-tests]]
    [clojure.tools.namespace.repl :refer [refresh set-refresh-dirs]]
    [criterium.core :refer [quick-bench]]
-   [formatting-stack.branch-formatter :refer [format-and-lint-branch!]]
-   [formatting-stack.project-formatter :refer [format-and-lint-project!]]
+   [formatting-stack.branch-formatter :refer [format-and-lint-branch! lint-branch!]]
+   [formatting-stack.compilers.test-runner :refer [test!]]
+   [formatting-stack.project-formatter :refer [format-and-lint-project! lint-project!]]
    [lambdaisland.deep-diff]
    [nedap.utils.test.api :refer :all]))
 
@@ -16,17 +17,23 @@
 
 (defn suite []
   (refresh)
-  (run-all-tests #".*\.nedap\.utils\.test\..*"))
+  (run-all-tests #".*\.nedap\.utils\.test.*"))
 
 (defn unit []
   (refresh)
-  (run-all-tests #"unit\.nedap\.utils\.test\..*"))
+  (run-all-tests #"unit\.nedap\.utils\.test.*"))
 
 (defn slow []
   (refresh)
-  (run-all-tests #"integration\.nedap\.utils\.test\..*"))
+  (run-all-tests #"integration\.nedap\.utils\.test.*"))
 
 (defn diff [x y]
   (-> x
       (lambdaisland.deep-diff/diff y)
       (lambdaisland.deep-diff/pretty-print)))
+
+(defn gt
+  "gt stands for git tests"
+  []
+  (refresh)
+  (test!))
