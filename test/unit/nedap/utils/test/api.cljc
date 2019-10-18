@@ -1,8 +1,10 @@
 (ns unit.nedap.utils.test.api
   (:require
-   #?(:clj [clojure.test :refer [deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are] :refer [use-fixtures]])
-   [nedap.utils.test.api :as sut]
-   [clojure.string :as string]))
+   #?(:clj [clojure.test :refer [do-report run-tests deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are run-tests] :refer [use-fixtures do-report]])
+   [clojure.string :as string]
+   [matcher-combinators.test :refer [match?]]
+   [nedap.utils.test.api :as sut])
+  #?(:clj (:import (clojure.lang ExceptionInfo))))
 
 (defrecord Student  [name])
 (defrecord School [students])
@@ -134,28 +136,46 @@
        :to        (do (swap! proof conj :to)        true))
 
       (is (= [:to-change :from :body :to-change :to]
-             @proof)))))
+             @proof))))
 
-(defn assertion-thrown?
-  [assertion form]
-  (try
-    (eval form)
-    false
-    (catch Exception e
-      (or (string/includes? (ex-message (ex-cause e)) assertion)
-          (throw (ex-cause e))))))
+  (testing "normal exception behaviour"
+    (is (thrown-with-msg? #?(:clj ExceptionInfo :cljs js/Error) #"my special failure"
+                          (sut/expect (throw (ex-info "my special failure" {})) :to-change 0 :from 0 :to 0))))
 
-#?(:clj
-   (deftest expect-validation
-     (testing "asserts correct options"
-       (are [form] (assertion-thrown?
-                    "(spec/valid? :nedap.utils.test.impl/expect-options options)"
-                    form)
-         `(nedap.utils.test.api/expect 1 :to-tjainge 0 :from 0 :to 1)
-         `(nedap.utils.test.api/expect 1 :to-change 0 :from 0 :to 1 :extra :value)
-         `(nedap.utils.test.api/expect 1 :to-change 0 :from nil :to 1)))
+  (testing "failures"
+    (let [test-result (atom {})
+          a (atom 0)]
+      (are [form expected] (match? expected
+                                   (with-redefs [do-report (partial reset! test-result)]
+                                     form
+                                     @test-result))
+        (sut/expect 0 :to-change 0 :from 0 :to 1)
+        '{:type :fail, :expected (clojure.core/= 0 1), :actual (not (clojure.core/= 0 1))}
 
-     (testing "asserts at least one body"
-       (is (assertion-thrown?
-            "(spec/valid? (complement empty?) bodies)"
-            `(nedap.utils.test.api/expect :to-change 0 :from 0 :to 0))))))
+        (sut/expect (swap! a inc) :to-change @a :from 1 :to 2)
+        '{:type :fail, :expected (clojure.core/= (clojure.core/deref a) 2), :actual (not (clojure.core/= 1 2))}
+
+        (sut/expect (swap! a inc) :to-change @a :from 1 :to 3)
+        '{:type :fail, :expected (clojure.core/= (clojure.core/deref a) 3), :actual (not (clojure.core/= 2 3))})))
+
+  #?(:clj
+     (letfn [(assertion-thrown? [assertion form]
+               (try
+                 (eval form)
+                 false
+                 (catch Exception e
+                   (or (string/includes? (ex-message (ex-cause e)) assertion)
+                       (throw (ex-cause e))))))]
+
+       (testing "asserts correct opons"
+         (are [form] (assertion-thrown?
+                      "(spec/valid? :nedap.utils.test.impl/expect-options options)"
+                      form)
+           `(sut/expect 1 :to-tjainge 0 :from 0 :to 1)
+           `(sut/expect 1 :to-change 0 :from 0 :to 1 :extra :value)
+           `(sut/expect 1 :to-change 0 :from nil :to 1)))
+
+       (testing "asserts at least one body"
+         (is (assertion-thrown?
+              "(spec/valid? (complement empty?) bodies)"
+              `(sut/expect :to-change 0 :from 0 :to 0)))))))
