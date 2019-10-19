@@ -73,8 +73,9 @@
                         :source-paths ["dev"]
                         :repl-options {:init-ns dev}}
 
-             :test     {:dependencies [[com.nedap.staffing-solutions/matcher-combinators "1.1.0-alpha1"]]}
-             
+             :test     {:dependencies [[com.nedap.staffing-solutions/matcher-combinators "1.1.0-alpha1"
+                                        :exclusions [commons-codec]]]}
+
              :provided {:dependencies [[org.clojure/clojurescript "1.10.520"
                                         :exclusions [com.cognitect/transit-clj
                                                      com.google.code.findbugs/jsr305
