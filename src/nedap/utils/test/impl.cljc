@@ -42,21 +42,15 @@
          (set! (.-exitCode js/process) 0)
          (set! (.-exitCode js/process) 1)))))
 
-(spec/def ::to   some?)
-(spec/def ::from some?)
-(spec/def ::to-change some?)
-(spec/def ::expect-options
-  (spec/keys :req-un [::to-change
-                      ::from
-                      ::to]))
-
 (defn expect
-  [bodies {:keys [to-change from to] :as options} clj?]
-  {:pre [(spec/valid? (complement empty?) bodies)
-         (spec/valid? ::expect-options options)
+  [bodies {:keys [to-change from to]} clj?]
+  {:pre [(spec/valid? seq bodies)
+         (spec/valid? some? to)
+         (spec/valid? some? from)
+         (spec/valid? some? to-change)
          (spec/valid? boolean? clj?)]}
   (let [is (if clj? 'clojure.test/is 'cljs.test/is)]
     `(do
-       (~is (= ~to-change ~from) "Initial state doesn't match!")
+       (assert (= ~to-change ~from) "Initial state doesn't match :from")
        ~@bodies
        (~is (= ~to-change ~to)))))

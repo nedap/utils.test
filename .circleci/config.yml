@@ -40,7 +40,7 @@ jobs:
 
     - run:
         name: 'Run JVM tests'
-        command: lein with-profiles -dev,+test test
+        command: lein with-profile -dev test
 
     - run:
         name: 'Compile ClojureScript test suite'

@@ -138,11 +138,11 @@
       (is (= [:to-change :from :body :to-change :to]
              @proof))))
 
-  (testing "normal exception behaviour"
+  (testing "exception in body"
     (is (thrown-with-msg? #?(:clj ExceptionInfo :cljs js/Error) #"my special failure"
                           (sut/expect (throw (ex-info "my special failure" {})) :to-change 0 :from 0 :to 0))))
 
-  (testing "failures"
+  (testing ":to failures"
     (let [test-result (atom {})
           a (atom 0)]
       (are [form expected] (match? expected
@@ -150,13 +150,10 @@
                                      form
                                      @test-result))
         (sut/expect 0 :to-change 0 :from 0 :to 1)
-        '{:type :fail, :expected (clojure.core/= 0 1), :actual (not (clojure.core/= 0 1))}
+        `{:type :fail, :expected (= 0 1), :actual (~'not (= 0 1))}
 
-        (sut/expect (swap! a inc) :to-change @a :from 1 :to 2)
-        '{:type :fail, :expected (clojure.core/= (clojure.core/deref a) 2), :actual (not (clojure.core/= 1 2))}
-
-        (sut/expect (swap! a inc) :to-change @a :from 1 :to 3)
-        '{:type :fail, :expected (clojure.core/= (clojure.core/deref a) 3), :actual (not (clojure.core/= 2 3))})))
+        (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
+        `{:type :fail, :expected (= (deref ~'a) 2), :actual (~'not (= 1 2))})))
 
   #?(:clj
      (letfn [(assertion-thrown? [assertion form]
@@ -167,15 +164,19 @@
                    (or (string/includes? (ex-message (ex-cause e)) assertion)
                        (throw (ex-cause e))))))]
 
-       (testing "asserts correct opons"
-         (are [form] (assertion-thrown?
-                      "(spec/valid? :nedap.utils.test.impl/expect-options options)"
-                      form)
-           `(sut/expect 1 :to-tjainge 0 :from 0 :to 1)
-           `(sut/expect 1 :to-change 0 :from 0 :to 1 :extra :value)
-           `(sut/expect 1 :to-change 0 :from nil :to 1)))
+       (testing "asserts correct options"
+         (are [failure form] (assertion-thrown? failure form)
+
+           "(spec/valid? some? to-change)"
+           `(sut/expect () :to-tjainge 0 :from 0 :to 1)
+
+           "(spec/valid? some? to-change)" ;; last value causes :to-change to be evaluated as body
+           `(sut/expect () :to-change 0 :from 0 :to 1 :extra :value)
+
+           "(spec/valid? some? from)"
+           `(sut/expect () :to-change 0 :from nil :to 1)))
 
        (testing "asserts at least one body"
          (is (assertion-thrown?
-              "(spec/valid? (complement empty?) bodies)"
+              "(spec/valid? seq bodies)"
               `(sut/expect :to-change 0 :from 0 :to 0)))))))

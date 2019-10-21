@@ -54,7 +54,7 @@
     `(cljs.test/run-tests (cljs.test/empty-env ::impl/exit-code-reporter) ~@namespaces)))
 
 (defmacro expect [& forms]
-  "Asserts `to-change` yields `from`, and and yields `to` after evaluating all `forms`.
+  "Asserts (via `#'clojure.test/is`) that the expression denoted by `to-change` changes from `from`, to `to`.
 
   `(expect (swap! a inc) :to-change @a :from 1 :to 2)`"
   (let [option-length 6
