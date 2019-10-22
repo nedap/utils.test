@@ -57,8 +57,12 @@
   "Asserts (via `#'clojure.test/is`) that the expression denoted by `to-change` changes from `from`, to `to`.
 
   `(expect (swap! a inc) :to-change @a :from 1 :to 2)`"
-  (let [option-length 6
-        options (take-last option-length forms)
-        bodies  (drop-last option-length forms)
+  (let [options (->> (reverse forms)
+                     (partition 2)
+                     (take-while (fn [[_val key]]
+                                   (keyword? key)))
+                     (reduce (fn [memo [val key]]
+                               (assoc memo key val)) {}))
+        bodies  (drop-last (* 2 (count options)) forms)
         clj?    (-> &env :ns nil?)]
     (impl/expect bodies options clj?)))

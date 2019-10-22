@@ -4,7 +4,7 @@
    [clojure.string :as string]
    [matcher-combinators.test :refer [match?]]
    [nedap.utils.test.api :as sut])
-  #?(:clj (:import (clojure.lang ExceptionInfo))))
+  #?(:clj (:import (clojure.lang ExceptionInfo Compiler$CompilerException))))
 
 (defrecord Student  [name])
 (defrecord School [students])
@@ -121,13 +121,14 @@
                 :from 0
                 :to 1)
 
-    (sut/expect (swap! a inc)
-                (swap! a inc)
-                :to-change @a
-                :from 1
-                :to 3))
+    (testing "bodies can span more than one expression"
+      (sut/expect (swap! a inc)
+                  (swap! a inc)
+                  :to-change @a
+                  :from 1
+                  :to 3)))
 
-  (testing "the macroexpansion evaluates each part exactly once"
+  (testing "the macroexpansion evaluation"
     (let [proof (atom [])]
       (sut/expect
        (swap! proof conj :body)
@@ -156,27 +157,34 @@
         `{:type :fail, :expected (= (deref ~'a) 2), :actual (~'not (= 1 2))})))
 
   #?(:clj
-     (letfn [(assertion-thrown? [assertion form]
-               (try
-                 (eval form)
-                 false
-                 (catch Exception e
-                   (or (string/includes? (ex-message (ex-cause e)) assertion)
-                       (throw (ex-cause e))))))]
+     (testing "macroexpansion-time validation"
+       (letfn [(assertion-thrown? [assertion form]
+                 (try
+                   (eval form)
+                   false
+                   (catch Compiler$CompilerException e
+                     (or (string/includes? (ex-message (ex-cause e)) assertion)
+                         (throw (ex-cause e))))))]
 
-       (testing "asserts correct options"
-         (are [failure form] (assertion-thrown? failure form)
+         (testing "asserts correct options"
+           (are [failure form] (assertion-thrown? failure form)
 
-           "(spec/valid? some? to-change)"
-           `(sut/expect () :to-tjainge 0 :from 0 :to 1)
+             "#{:to-change :from :to}"
+             `(sut/expect () :to-tjainge 0 :from 0 :to 1)
 
-           "(spec/valid? some? to-change)" ;; last value causes :to-change to be evaluated as body
-           `(sut/expect () :to-change 0 :from 0 :to 1 :extra :value)
+             "#{:to-change :from :to}"
+             `(sut/expect () :to-change 0 :from 0 :to 1 :extra :value)
 
-           "(spec/valid? some? from)"
-           `(sut/expect () :to-change 0 :from nil :to 1)))
+             "#{:to-change :from :to}"
+             `(sut/expect () :missing :keys)
 
-       (testing "asserts at least one body"
-         (is (assertion-thrown?
-              "(spec/valid? seq bodies)"
-              `(sut/expect :to-change 0 :from 0 :to 0)))))))
+             "#{:to-change :from :to}"
+             `(sut/expect () :unexpected () :signature 4 :keys)
+
+             "(some? from)"
+             `(sut/expect () :to-change 0 :from nil :to 1)))
+
+         (testing "asserts at least one body"
+           (is (assertion-thrown?
+                "(seq bodies)"
+                `(sut/expect :to-change 0 :from 0 :to 0))))))))
