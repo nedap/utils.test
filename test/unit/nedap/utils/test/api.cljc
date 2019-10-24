@@ -147,10 +147,11 @@
                   :from {}
                   :to ^::test {})
 
-      (sut/expect (swap! proof with-meta {})
-                  :to-change @proof
-                  :from ^::test {}
-                  :to {})))
+      (let [proof (atom ^::test {})]
+        (sut/expect (swap! proof with-meta {})
+                    :to-change @proof
+                    :from ^::test {}
+                    :to {}))))
 
   (testing "exception in body"
     (is (thrown-with-msg? #?(:clj ExceptionInfo :cljs js/Error) #"my special failure"
@@ -164,13 +165,13 @@
                                      form
                                      @test-result))
         (sut/expect 0 :to-change 0 :from 0 :to 1)
-        `{:type :fail, :expected (impl/meta= 0 1), :actual (~'not (impl/meta= 0 1))}
+        `{:type :fail, :expected (impl/meta= [0 1]), :actual (~'not (impl/meta= [0 1]))}
 
         (sut/expect 0 :to-change {} :from {} :to ^::test {})
-        `{:type :fail, :expected (impl/meta= {} {}), :actual (~'not (impl/meta= {} {}))}
+        `{:type :fail, :expected (impl/meta= [{} {}]), :actual (~'not (impl/meta= [{} {}]))}
 
         (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
-        `{:type :fail, :expected (impl/meta= (deref ~'a) 2), :actual (~'not (impl/meta= 1 2))})))
+        `{:type :fail, :expected (impl/meta= [(deref ~'a) 2]), :actual (~'not (impl/meta= [1 2]))})))
 
   #?(:clj
      (testing "macroexpansion-time validation"
