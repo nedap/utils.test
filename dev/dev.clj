@@ -4,7 +4,7 @@
    [clojure.java.javadoc :refer [javadoc]]
    [clojure.pprint :refer [pprint]]
    [clojure.repl :refer [apropos dir doc find-doc pst source]]
-   [clojure.test :refer [run-all-tests run-tests]]
+   [clojure.test :refer [run-all-tests]]
    [clojure.tools.namespace.repl :refer [refresh set-refresh-dirs]]
    [criterium.core :refer [quick-bench]]
    [formatting-stack.branch-formatter :refer [format-and-lint-branch! lint-branch!]]

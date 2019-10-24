@@ -3,8 +3,7 @@
    #?(:clj [clojure.test] :cljs [cljs.test])
    [clojure.spec.alpha :as spec]
    [clojure.walk :as walk]
-   [nedap.utils.test.impl :as impl])
-  #?(:clj (:import (clojure.lang IMeta))))
+   [nedap.utils.test.impl :as impl]))
 
 (defn simple=
   "Check whether all `vals` have similar structure disregarding possible order
@@ -18,18 +17,7 @@
   "Do all `xs` (and their metadata, and their members' metadata, and also any metametadata) equal?"
   [& xs]
   {:post [(boolean? %)]}
-  (->> xs
-       (map (fn [x]
-              (->> x
-                   (walk/postwalk (fn walker [form]
-                                    (if-not #?(:clj  (instance? IMeta form)
-                                               :cljs (satisfies? IMeta form))
-                                      form
-                                      (if-let [metadata-map (-> form meta not-empty)]
-                                        [(walk/postwalk walker metadata-map)
-                                         form]
-                                        form)))))))
-       (apply =)))
+  (impl/meta= xs))
 
 (defn macroexpansion=
   "Do all `xs` equal, when deeming any contained gensyms unconditionally equal?
@@ -52,3 +40,17 @@
   (if-let [clj? (-> &env :ns nil?)]
     `(clojure.test/run-tests ~@namespaces)
     `(cljs.test/run-tests (cljs.test/empty-env ::impl/exit-code-reporter) ~@namespaces)))
+
+(defmacro expect [& forms]
+  "Asserts (via `#'clojure.test/is`) that the expression denoted by `to-change` changes from `from`, to `to`.
+
+  `(expect (swap! a inc) :to-change @a :from 1 :to 2)`"
+  (let [options (->> (reverse forms)
+                     (partition 2)
+                     (take-while (fn [[_val key]]
+                                   (keyword? key)))
+                     (reduce (fn [memo [val key]]
+                               (assoc memo key val)) {}))
+        bodies  (drop-last (* 2 (count options)) forms)
+        clj?    (-> &env :ns nil?)]
+    (impl/expect bodies options clj?)))

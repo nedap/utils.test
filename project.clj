@@ -70,8 +70,11 @@
                                        [org.clojure/tools.reader "1.1.1" #_"transitive"]
                                        [rewrite-clj "0.6.1" #_"transitive"]]
                         :plugins      [[lein-cloverage "1.0.13"]]
-                        :source-paths ["dev" "test"]
+                        :source-paths ["dev"]
                         :repl-options {:init-ns dev}}
+
+             :test     {:dependencies [[com.nedap.staffing-solutions/matcher-combinators "1.1.0-alpha1"
+                                        :exclusions [commons-codec]]]}
 
              :provided {:dependencies [[org.clojure/clojurescript "1.10.520"
                                         :exclusions [com.cognitect/transit-clj
