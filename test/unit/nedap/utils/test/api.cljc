@@ -139,7 +139,7 @@
       (is (= [:to-change :from :body :to-change :to]
              @proof))))
 
-  (testing "works for meta on identity-equal values"
+  (testing "possible to test metadata"
     (let [proof (atom {})]
       (sut/expect (swap! proof with-meta {::test true})
                   :to-change (meta @proof)
