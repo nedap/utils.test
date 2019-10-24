@@ -3,7 +3,8 @@
    #?(:clj [clojure.test] :cljs [cljs.test])
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
-   [clojure.walk :as walk]))
+   [clojure.walk :as walk])
+  #?(:clj (:import (clojure.lang IMeta))))
 
 (defn simplify
   "Transforms records into maps and Sequential collections into sets, identity otherwise.
@@ -18,6 +19,21 @@
        (sequential? node) (set node) ;; Make collections into a set to prevent ordering issues
        :else              node))
    val))
+
+(defn meta=
+  [xs]
+  (->> xs
+     (map (fn [x]
+            (->> x
+                 (walk/postwalk (fn walker [form]
+                                  (if-not #?(:clj  (instance? IMeta form)
+                                             :cljs (satisfies? IMeta form))
+                                    form
+                                    (if-let [metadata-map (-> form meta not-empty)]
+                                      [(walk/postwalk walker metadata-map)
+                                       form]
+                                      form)))))))
+     (apply =)))
 
 (defn replace-gensyms [form]
   (if (and (symbol? form)
@@ -46,7 +62,7 @@
   "true if xs differ in identity or metadata"
   [& xs]
   (or (apply not= xs)
-      (apply not= (map meta xs))))
+      (not (meta= xs))))
 
 (defn expect
   [bodies {:keys [to-change from to] :as opts} clj?]
