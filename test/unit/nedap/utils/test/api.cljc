@@ -139,9 +139,16 @@
       (is (= [:to-change :from :body :to-change :to]
              @proof))))
 
+  (testing "works for meta on identity-equal values"
+    (let [proof (atom {})]
+      (sut/expect (swap! proof with-meta {::test true})
+                  :to-change (meta @proof)
+                  :from nil
+                  :to {::test true})))
+
   (testing "exception in body"
     (is (thrown-with-msg? #?(:clj ExceptionInfo :cljs js/Error) #"my special failure"
-                          (sut/expect (throw (ex-info "my special failure" {})) :to-change 0 :from 0 :to 0))))
+                          (sut/expect (throw (ex-info "my special failure" {})) :to-change 0 :from 0 :to 1))))
 
   (testing ":to failures"
     (let [test-result (atom {})
@@ -181,10 +188,10 @@
              "#{:to-change :from :to}"
              `(sut/expect () :unexpected () :signature 4 :keys)
 
-             "(some? from)"
-             `(sut/expect () :to-change 0 :from nil :to 1)))
+             "0 should be different from 0"
+             `(sut/expect () :to-change 0 :from 0 :to 0)))
 
          (testing "asserts at least one body"
            (is (assertion-thrown?
                 "(seq bodies)"
-                `(sut/expect :to-change 0 :from 0 :to 0))))))))
+                `(sut/expect :to-change 0 :from 0 :to 1))))))))

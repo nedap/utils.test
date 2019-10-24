@@ -42,13 +42,18 @@
          (set! (.-exitCode js/process) 0)
          (set! (.-exitCode js/process) 1)))))
 
+(defn different?
+  "true if xs differ in identity or metadata"
+  [& xs]
+  (or (apply not= xs)
+      (apply not= (map meta xs))))
+
 (defn expect
   [bodies {:keys [to-change from to] :as opts} clj?]
   {:pre [(spec/valid? boolean? clj?)]}
   (assert (seq bodies) "bodies can't be empty")
   (assert (= #{:to-change :from :to} (set (keys opts))) (pr-str opts))
-  (assert (some? to) (pr-str to))
-  (assert (some? from) (pr-str from))
+  (assert (different? from to) (str (pr-str from) " should be different from " (pr-str to)))
   (assert (some? to-change) (pr-str to-change))
 
   (let [is (if clj? 'clojure.test/is 'cljs.test/is)]
