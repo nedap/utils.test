@@ -166,6 +166,9 @@
         (sut/expect 0 :to-change 0 :from 0 :to 1)
         `{:type :fail, :expected (impl/meta= 0 1), :actual (~'not (impl/meta= 0 1))}
 
+        (sut/expect 0 :to-change {} :from {} :to ^::test {})
+        `{:type :fail, :expected (impl/meta= {} {}), :actual (~'not (impl/meta= {} {}))}
+
         (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
         `{:type :fail, :expected (impl/meta= (deref ~'a) 2), :actual (~'not (impl/meta= 1 2))})))
 
