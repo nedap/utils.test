@@ -17,7 +17,7 @@
   "Do all `xs` (and their metadata, and their members' metadata, and also any metametadata) equal?"
   [& xs]
   {:post [(boolean? %)]}
-  (impl/meta= xs))
+  (apply impl/meta= xs))
 
 (defn macroexpansion=
   "Do all `xs` equal, when deeming any contained gensyms unconditionally equal?

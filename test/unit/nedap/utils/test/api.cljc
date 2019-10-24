@@ -3,6 +3,7 @@
    #?(:clj [clojure.test :refer [do-report run-tests deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are run-tests] :refer [use-fixtures do-report]])
    [clojure.string :as string]
    [matcher-combinators.test :refer [match?]]
+   [nedap.utils.test.impl :as impl]
    [nedap.utils.test.api :as sut])
   #?(:clj (:import (clojure.lang ExceptionInfo Compiler$CompilerException))))
 
@@ -142,9 +143,14 @@
   (testing "possible to test metadata"
     (let [proof (atom {})]
       (sut/expect (swap! proof with-meta {::test true})
-                  :to-change (meta @proof)
-                  :from nil
-                  :to {::test true})))
+                  :to-change @proof
+                  :from {}
+                  :to ^::test {})
+
+      (sut/expect (swap! proof with-meta {})
+                  :to-change @proof
+                  :from ^::test {}
+                  :to {})))
 
   (testing "exception in body"
     (is (thrown-with-msg? #?(:clj ExceptionInfo :cljs js/Error) #"my special failure"
@@ -158,10 +164,10 @@
                                      form
                                      @test-result))
         (sut/expect 0 :to-change 0 :from 0 :to 1)
-        `{:type :fail, :expected (= 0 1), :actual (~'not (= 0 1))}
+        `{:type :fail, :expected (impl/meta= 0 1), :actual (~'not (impl/meta= 0 1))}
 
         (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
-        `{:type :fail, :expected (= (deref ~'a) 2), :actual (~'not (= 1 2))})))
+        `{:type :fail, :expected (impl/meta= (deref ~'a) 2), :actual (~'not (impl/meta= 1 2))})))
 
   #?(:clj
      (testing "macroexpansion-time validation"
@@ -189,7 +195,10 @@
              `(sut/expect () :unexpected () :signature 4 :keys)
 
              "0 should be different from 0"
-             `(sut/expect () :to-change 0 :from 0 :to 0)))
+             `(sut/expect () :to-change 0 :from 0 :to 0)
+
+             "{} should be different from {}"
+             `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})))
 
          (testing "asserts at least one body"
            (is (assertion-thrown?
