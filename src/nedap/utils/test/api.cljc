@@ -5,7 +5,7 @@
    [clojure.walk :as walk]
    [nedap.utils.test.impl :as impl]))
 
-(defn simple=
+(defn ^:deprecated simple=
   "Check whether all `vals` have similar structure disregarding possible order
 
   NOTE: this function will disregard duplicates"
