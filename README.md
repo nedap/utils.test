@@ -12,6 +12,8 @@ A collection of test helpers.
 
 * `nedap.utils.test.api/run-tests` macroexpands to its clojure.test/cljs.test counterpart. It only adds something for the cljs variant: it sets an adequate exit code to the Node process.
 
+* `nedap.utils.test.api/expect` allows you to assert side effects in code. look at [examples in the tests](https://github.com/nedap/utils.test/blob/55021bf884fb06aa3cb9d2706ffe6816a2923e45/test/unit/nedap/utils/test/api.cljc#L119-L123).
+
 ## Installation
 
 ```clojure
