@@ -18,15 +18,16 @@
                              :username :env/artifactory_user
                              :password :env/artifactory_pass}}
 
-  :deploy-repositories {"clojars" {:url      "https://clojars.org/repo"
-                                   :username :env/clojars_user
-                                   :password :env/clojars_pass}}
-
   :repository-auth {#"https://nedap.jfrog\.io/nedap/staffing-solutions/"
                     {:username :env/artifactory_user
                      :password :env/artifactory_pass}}
 
+  :deploy-repositories {"clojars" {:url      "https://clojars.org/repo"
+                                   :username :env/clojars_user
+                                   :password :env/clojars_pass}}
   :target-path "target/%s"
+
+  :test-paths ["src" "test"]
 
   :monkeypatch-clojure-test false
 
@@ -35,7 +36,6 @@
 
   ;; Please don't add `:hooks [leiningen.cljsbuild]`. It can silently skip running the JS suite on `lein test`.
   ;; It also interferes with Cloverage.
-
   :cljsbuild {:builds {"test" {:source-paths ["src" "test"]
                                :compiler     {:main          nedap.utils.test.test-runner
                                               :output-to     "target/out/tests.js"
@@ -54,29 +54,24 @@
   ;; NOTE: deps marked with #_"transitive" are there to satisfy the `:pedantic?` option.
   :profiles {:dev      {:dependencies [[cider/cider-nrepl "0.16.0" #_"formatting-stack needs it"]
                                        [com.clojure-goes-fast/clj-java-decompiler "0.2.1"]
+                                       [com.nedap.staffing-solutions/speced.def "1.1.1"]
                                        [com.nedap.staffing-solutions/utils.modular "2.0.0"]
-                                       [com.nedap.staffing-solutions/speced.def "1.0.0"]
+                                       [com.nedap.staffing-solutions/utils.spec.predicates "1.1.0"]
                                        [com.stuartsierra/component "0.4.0"]
                                        [com.taoensso/timbre "4.10.0"]
                                        [criterium "0.4.4"]
-                                       [formatting-stack "1.0.0-alpha3"
-                                        :exclusions [rewrite-clj]]
+                                       [formatting-stack "1.0.0"]
                                        [lambdaisland/deep-diff "0.0-29"]
-                                       [medley "1.1.0"]
-                                       [org.clojure/core.async "0.4.490"]
+                                       [medley "1.2.0"]
+                                       [org.clojure/core.async "0.5.527"]
                                        [org.clojure/math.combinatorics "0.1.1"]
                                        [org.clojure/test.check "0.10.0-alpha3"]
-                                       [org.clojure/tools.namespace "0.3.0-alpha4"]
-                                       [org.clojure/tools.reader "1.1.1" #_"transitive"]
-                                       [rewrite-clj "0.6.1" #_"transitive"]]
-                        :plugins      [[lein-cloverage "1.0.13"]]
+                                       [org.clojure/tools.namespace "0.3.0-alpha4"]]
+                        :plugins      [[lein-cloverage "1.1.1"]]
                         :source-paths ["dev"]
                         :repl-options {:init-ns dev}}
 
-             :test     {:dependencies [[com.nedap.staffing-solutions/matcher-combinators "1.1.0-alpha1"
-                                        :exclusions [commons-codec]]]}
-
-             :provided {:dependencies [[org.clojure/clojurescript "1.10.520"
+             :provided {:dependencies [[org.clojure/clojurescript "1.10.597"
                                         :exclusions [com.cognitect/transit-clj
                                                      com.google.code.findbugs/jsr305
                                                      com.google.errorprone/error_prone_annotations]]
@@ -84,7 +79,12 @@
                                        [com.google.errorprone/error_prone_annotations "2.1.3" #_"transitive"]
                                        [com.google.code.findbugs/jsr305 "3.0.2" #_"transitive"]]}
 
+             :test     {:dependencies [[com.nedap.staffing-solutions/matcher-combinators "1.1.0-alpha1"
+                                        :exclusions [commons-codec]]
+                                       [com.nedap.staffing-solutions/utils.test "1.6.1"]]
+                        :jvm-opts     ["-Dclojure.core.async.go-checking=true"]}
+
              :ci       {:pedantic?    :abort
                         :jvm-opts     ["-Dclojure.main.report=stderr"]
                         :global-vars  {*assert* true} ;; `ci.release-workflow` relies on runtime assertions
-                        :dependencies [[com.nedap.staffing-solutions/ci.release-workflow "1.3.0-alpha3"]]}})
+                        :dependencies [[com.nedap.staffing-solutions/ci.release-workflow "1.6.0"]]}})
