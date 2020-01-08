@@ -53,10 +53,16 @@
 #?(:cljs
    (do
      (derive ::exit-code-reporter :cljs.test/default)
+
+     (defn set-exit-code-for! [summary process-object]
+       (assert (map? summary))
+       (if-not (cljs.test/successful? summary)
+         (set! (.-exitCode process-object) 1)
+         (when-not (.-exitCode process-object)
+           (set! (.-exitCode process-object) 0))))
+
      (defmethod cljs.test/report [::exit-code-reporter :end-run-tests] [summary]
-       (if (cljs.test/successful? summary)
-         (set! (.-exitCode js/process) 0)
-         (set! (.-exitCode js/process) 1)))))
+       (set-exit-code-for! summary js/process))))
 
 (defn expect
   [bodies {:keys [to-change from to] :as opts} clj?]
