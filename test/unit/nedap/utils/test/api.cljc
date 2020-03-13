@@ -157,21 +157,24 @@
     (is (thrown-with-msg? #?(:clj ExceptionInfo :cljs js/Error) #"my special failure"
                           (sut/expect (throw (ex-info "my special failure" {})) :to-change 0 :from 0 :to 1))))
 
-  (testing ":to failures"
-    (let [test-result (atom {})
-          a (atom 0)]
-      (are [form expected] (match? expected
-                                   (with-redefs [do-report (partial reset! test-result)]
-                                     form
-                                     @test-result))
-        (sut/expect 0 :to-change 0 :from 0 :to 1)
-        `{:type :fail, :expected (impl/meta= [0 1]), :actual (~'not (impl/meta= [0 1]))}
+  ;; this test relies on #'with-redefs to capture the test-report
+  (when #?(:clj (not (System/getProperty "clojure.compiler.direct-linking"))
+           :cljs true)
+    (testing ":to failures"
+      (let [test-result (atom {})
+            a (atom 0)]
+        (are [form expected] (match? expected
+                                     (with-redefs [do-report (partial reset! test-result)]
+                                       form
+                                       @test-result))
+          (sut/expect 0 :to-change 0 :from 0 :to 1)
+          `{:type :fail, :expected (impl/meta= [0 1]), :actual (~'not (impl/meta= [0 1]))}
 
-        (sut/expect 0 :to-change {} :from {} :to ^::test {})
-        `{:type :fail, :expected (impl/meta= [{} {}]), :actual (~'not (impl/meta= [{} {}]))}
+          (sut/expect 0 :to-change {} :from {} :to ^::test {})
+          `{:type :fail, :expected (impl/meta= [{} {}]), :actual (~'not (impl/meta= [{} {}]))}
 
-        (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
-        `{:type :fail, :expected (impl/meta= [(deref ~'a) 2]), :actual (~'not (impl/meta= [1 2]))})))
+          (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
+          `{:type :fail, :expected (impl/meta= [(deref ~'a) 2]), :actual (~'not (impl/meta= [1 2]))}))))
 
   #?(:clj
      (when *assert*
