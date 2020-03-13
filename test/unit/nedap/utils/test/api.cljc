@@ -201,7 +201,7 @@
              "0 should be different from 0"
              `(sut/expect () :to-change 0 :from 0 :to 0)
 
-             "{} should be different from {}"
+             "^#:unit.nedap.utils.test.api{:wat true} {} should be different from ^#:unit.nedap.utils.test.api{:wat true} {}"
              `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})))
 
          (testing "asserts at least one body"
