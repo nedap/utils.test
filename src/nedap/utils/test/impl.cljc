@@ -76,6 +76,8 @@
     `(do
        (let [to-change# ~to-change
              from# ~from]
-         (assert (meta= [to-change# from#]) (str (pr-str to-change#) " does not match expected from: " (pr-str from#))))
+         (assert (meta= [to-change# from#])
+                 (binding [*print-meta* true]
+                   (str (pr-str to-change#) " does not match expected from: " (pr-str from#)))))
        ~@bodies
        (~is (meta= [~to-change ~to])))))
