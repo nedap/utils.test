@@ -157,54 +157,58 @@
     (is (thrown-with-msg? #?(:clj ExceptionInfo :cljs js/Error) #"my special failure"
                           (sut/expect (throw (ex-info "my special failure" {})) :to-change 0 :from 0 :to 1))))
 
-  (testing ":to failures"
-    (let [test-result (atom {})
-          a (atom 0)]
-      (are [form expected] (match? expected
-                                   (with-redefs [do-report (partial reset! test-result)]
-                                     form
-                                     @test-result))
-        (sut/expect 0 :to-change 0 :from 0 :to 1)
-        `{:type :fail, :expected (impl/meta= [0 1]), :actual (~'not (impl/meta= [0 1]))}
+  ;; this test relies on #'with-redefs to capture the test-report
+  (when #?(:clj (not (System/getProperty "clojure.compiler.direct-linking"))
+           :cljs true)
+    (testing ":to failures"
+      (let [test-result (atom {})
+            a (atom 0)]
+        (are [form expected] (match? expected
+                                     (with-redefs [do-report (partial reset! test-result)]
+                                       form
+                                       @test-result))
+          (sut/expect 0 :to-change 0 :from 0 :to 1)
+          `{:type :fail, :expected (impl/meta= [0 1]), :actual (~'not (impl/meta= [0 1]))}
 
-        (sut/expect 0 :to-change {} :from {} :to ^::test {})
-        `{:type :fail, :expected (impl/meta= [{} {}]), :actual (~'not (impl/meta= [{} {}]))}
+          (sut/expect 0 :to-change {} :from {} :to ^::test {})
+          `{:type :fail, :expected (impl/meta= [{} {}]), :actual (~'not (impl/meta= [{} {}]))}
 
-        (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
-        `{:type :fail, :expected (impl/meta= [(deref ~'a) 2]), :actual (~'not (impl/meta= [1 2]))})))
+          (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
+          `{:type :fail, :expected (impl/meta= [(deref ~'a) 2]), :actual (~'not (impl/meta= [1 2]))}))))
 
   #?(:clj
-     (testing "macroexpansion-time validation"
-       (letfn [(assertion-thrown? [assertion form]
-                 (try
-                   (eval form)
-                   false
-                   (catch Compiler$CompilerException e
-                     (or (string/includes? (ex-message (ex-cause e)) assertion)
-                         (throw (ex-cause e))))))]
+     (when *assert*
+       (testing "macroexpansion-time validation"
+         (letfn [(assertion-thrown? [assertion form]
+                   (try
+                     (eval form)
+                     false
+                     (catch Compiler$CompilerException e
+                       (or (string/includes? (ex-message (ex-cause e)) assertion)
+                           (throw (ex-cause e))))))]
 
-         (testing "asserts correct options"
-           (are [failure form] (assertion-thrown? failure form)
+           (testing "asserts correct options"
+             (are [failure form] (assertion-thrown? failure form)
 
-             "#{:to-change :from :to}"
-             `(sut/expect () :to-tjainge 0 :from 0 :to 1)
+               "#{:to-change :from :to}"
+               `(sut/expect () :to-tjainge 0 :from 0 :to 1)
 
-             "#{:to-change :from :to}"
-             `(sut/expect () :to-change 0 :from 0 :to 1 :extra :value)
+               "#{:to-change :from :to}"
+               `(sut/expect () :to-change 0 :from 0 :to 1 :extra :value)
 
-             "#{:to-change :from :to}"
-             `(sut/expect () :missing :keys)
+               "#{:to-change :from :to}"
+               `(sut/expect () :missing :keys)
 
-             "#{:to-change :from :to}"
-             `(sut/expect () :unexpected () :signature 4 :keys)
+               "#{:to-change :from :to}"
+               `(sut/expect () :unexpected () :signature 4 :keys)
 
-             "0 should be different from 0"
-             `(sut/expect () :to-change 0 :from 0 :to 0)
+               "0 should be different from 0"
+               `(sut/expect () :to-change 0 :from 0 :to 0)
 
-             "{} should be different from {}"
-             `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})))
+               "^#:unit.nedap.utils.test.api{:wat true} {} should be different from ^#:unit.nedap.utils.test.api{:wat true} {}"
+               `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})))
 
-         (testing "asserts at least one body"
-           (is (assertion-thrown?
-                "(seq bodies)"
-                `(sut/expect :to-change 0 :from 0 :to 1))))))))
+           (testing "asserts at least one body"
+             (is (assertion-thrown?
+                  "(seq bodies)"
+                  `(sut/expect :to-change 0 :from 0 :to 1)))))))))

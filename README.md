@@ -15,7 +15,7 @@ A collection of test helpers.
 ## Installation
 
 ```clojure
-[com.nedap.staffing-solutions/utils.test "1.6.2"]
+[com.nedap.staffing-solutions/utils.test "1.6.3-alpha1"]
 ```
 
 ## ns organisation
@@ -25,11 +25,18 @@ There is exactly 1 namespace meant for public consumption:
 
 ## Documentation
 
-Please browse the public namespaces, which are documented and tested.
+Please browse the public namespaces, which are documented, speced and tested.
+
+## Development
+
+The default namespace is `dev`. Under it, `(refresh)` is available, which should give you a basic "Reloaded workflow".
+
+> It is recommended that you use `(clojure.tools.namespace.repl/refresh :after 'formatting-stack.core/format!)`.
 
 You can find examples in the [api test](test/unit/nedap/utils/test/api.cljc).
 
 ## License
 
 Copyright © Nedap
-This program and the accompanying materials are made available under the terms of the [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0)
+
+This program and the accompanying materials are made available under the terms of the [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0).
