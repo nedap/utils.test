@@ -3,6 +3,7 @@
   (:require
    [clojure.string :as string]
    [matcher-combinators.core :as matcher-combinators]
+   [matcher-combinators.matchers :as matchers]
    [matcher-combinators.model :as model]
    [matcher-combinators.result :as result]
    [nedap.utils.test.impl :as impl]))
@@ -41,3 +42,24 @@
   ([] (gensym "G__"))
   ([prefix-string]
    (map->Gensym {:expected prefix-string})))
+
+#?(:clj
+   (defrecord InAnyOrder [expected timeout]
+     matcher-combinators/Matcher
+     (-matcher-for [this] this)
+     (-matcher-for [this _] this)
+     (-match [_this actual]
+       (let [result (deref
+                     (future (matcher-combinators/match (matchers/in-any-order expected) actual))
+                     timeout
+                     ::timeout)]
+         (if (#{::timeout} result)
+           (throw (ex-info "in-any-order timed out", {:expected expected
+                                                      :actual   actual}))
+           result)))))
+
+(defn in-any-order [expected & {:keys [timeout]
+                                :or {timeout 5000}}]
+  #?(:clj (map->InAnyOrder {:expected expected
+                            :timeout  timeout})
+     :cljs (matchers/in-any-order expected)))
