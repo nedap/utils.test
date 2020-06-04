@@ -99,11 +99,14 @@
              :jdk11      {:dependencies [[javax.xml.bind/jaxb-api "2.3.1"]
                                          [org.glassfish.jaxb/jaxb-runtime "2.3.1"]]}
 
-             :test     {:dependencies [[nubank/matcher-combinators "1.5.1"]]
+             :test     {:dependencies [[nubank/matcher-combinators "1.5.1"
+                                        :exclusions [commons-codec
+                                                     org.clojure/spec.alpha]]]
                         :jvm-opts     ["-Dclojure.core.async.go-checking=true"
                                        "-Duser.language=en-US"]}
 
-             :ci       {:pedantic?    :abort
-                        :jvm-opts     ["-Dclojure.main.report=stderr"]
-                        :global-vars  {*assert* true} ;; `ci.release-workflow` relies on runtime assertions
-                        :dependencies [[com.nedap.staffing-solutions/ci.release-workflow "1.7.0-alpha3"]]}})
+             :ncrw       {:global-vars  {*assert* true} ;; `ci.release-workflow` relies on runtime assertions
+                          :dependencies [[com.nedap.staffing-solutions/ci.release-workflow "1.10.0"]]}
+
+             :ci         {:pedantic?    :abort
+                          :jvm-opts     ["-Dclojure.main.report=stderr"]}})
