@@ -20,8 +20,8 @@ A collection of test helpers.
 
 ## ns organisation
 
-There is exactly 1 namespace meant for public consumption:
- - `nedap.utils.test.api`
+ - `nedap.utils.test.api` 
+ - `nedap.utils.test.matchers` matcher-combinators matchers
 
 ## Documentation
 
