@@ -41,10 +41,11 @@
     `(clojure.test/run-tests ~@namespaces)
     `(cljs.test/run-tests (cljs.test/empty-env ::impl/exit-code-reporter) ~@namespaces)))
 
-(defmacro expect [& forms]
+(defmacro expect
   "Asserts (via `#'clojure.test/is`) that the expression denoted by `to-change` changes from `from`, to `to`.
 
   `(expect (swap! a inc) :to-change @a :from 1 :to 2)`"
+  [& forms]
   (let [options (->> (reverse forms)
                      (partition 2)
                      (take-while (fn [[_val key]]

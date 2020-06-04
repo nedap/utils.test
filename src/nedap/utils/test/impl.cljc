@@ -83,3 +83,10 @@
                    (str (pr-str to-change#) " does not match expected from: " (pr-str from#)))))
        ~@bodies
        (~is (meta= [~to-change ~to])))))
+
+#?(:clj
+    (defmacro when-matcher-combinators [& body]
+      (when (try (require 'matcher-combinators.core)
+                 true
+                 (catch Throwable _))
+        `(do ~@body))))
