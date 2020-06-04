@@ -99,8 +99,7 @@
              :jdk11      {:dependencies [[javax.xml.bind/jaxb-api "2.3.1"]
                                          [org.glassfish.jaxb/jaxb-runtime "2.3.1"]]}
 
-             :test     {:dependencies [[com.nedap.staffing-solutions/matcher-combinators "1.1.0-alpha1"
-                                        :exclusions [commons-codec]]]
+             :test     {:dependencies [[nubank/matcher-combinators "1.5.1"]]
                         :jvm-opts     ["-Dclojure.core.async.go-checking=true"
                                        "-Duser.language=en-US"]}
 
