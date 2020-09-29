@@ -3,8 +3,8 @@
    #?(:clj [clojure.test :refer [do-report run-tests deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are run-tests] :refer [use-fixtures do-report]])
    [clojure.string :as string]
    [matcher-combinators.test :refer [match?]]
-   [nedap.utils.test.impl :as impl]
-   [nedap.utils.test.api :as sut])
+   [nedap.utils.test.api :as sut]
+   [nedap.utils.test.impl :as impl])
   #?(:clj (:import (clojure.lang ExceptionInfo Compiler$CompilerException))))
 
 (defrecord Student  [name])

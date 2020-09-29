@@ -23,17 +23,17 @@
 (defn meta=
   [xs]
   (->> xs
-     (map (fn [x]
-            (->> x
-                 (walk/postwalk (fn walker [form]
-                                  (if-not #?(:clj  (instance? IMeta form)
-                                             :cljs (satisfies? IMeta form))
-                                    form
-                                    (if-let [metadata-map (-> form meta not-empty)]
-                                      [(walk/postwalk walker metadata-map)
-                                       form]
-                                      form)))))))
-     (apply =)))
+       (map (fn [x]
+              (->> x
+                   (walk/postwalk (fn walker [form]
+                                    (if-not #?(:clj  (instance? IMeta form)
+                                               :cljs (satisfies? IMeta form))
+                                      form
+                                      (if-let [metadata-map (-> form meta not-empty)]
+                                        [(walk/postwalk walker metadata-map)
+                                         form]
+                                        form)))))))
+       (apply =)))
 
 (defn replace-gensyms [form]
   (if (and (symbol? form)
@@ -64,8 +64,14 @@
      (defmethod cljs.test/report [::exit-code-reporter :end-run-tests] [summary]
        (set-exit-code-for! summary js/process))))
 
-(defmulti expect-matcher (fn [pred _ns] pred))
-(defmethod expect-matcher :default [pred ns] {:assert-expr pred :pred (ns-resolve ns pred)})
+(defmulti expect-matcher
+  "Given a symbol + ns returns :assert-expr and :pred.
+
+  `#'expect` uses `pred` is to compare values in assertions: `(not (pred from, to)`, `(pred from to-change).
+  assert-expr is the symbol used to construct the `is` form, which allows error-reporting such as "
+  (fn [sym _ns] sym))
+
+(defmethod expect-matcher :default [sym ns] {:assert-expr sym :pred (ns-resolve ns sym)})
 
 (defn expect
   [bodies {:keys [to-change from to with] :as opts} clj? ns]
