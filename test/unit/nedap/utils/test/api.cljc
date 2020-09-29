@@ -2,9 +2,10 @@
   (:require
    #?(:clj [clojure.test :refer [do-report run-tests deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are run-tests] :refer [use-fixtures do-report]])
    [clojure.string :as string]
+   [matcher-combinators.matchers :as matchers]
    [matcher-combinators.test :refer [match?]]
    [nedap.utils.test.api :as sut]
-   [nedap.utils.test.impl :as impl])
+   [nedap.utils.test.matchers])
   #?(:clj (:import (clojure.lang ExceptionInfo Compiler$CompilerException))))
 
 (defrecord Student  [name])
@@ -146,6 +147,14 @@
                   :to 1
                   :with =)))
 
+  (testing ":with match?"
+    (let [a (atom {::key ::value})]
+      (sut/expect (swap! a dissoc ::key)
+                  :with match?
+                  :to-change @a
+                  :from {::key ::value}
+                  :to {::key matchers/absent})))
+
   (testing "the macroexpansion evaluation"
     (let [proof (atom [])]
       (sut/expect
@@ -179,7 +188,8 @@
            :cljs true)
     (testing ":to failures"
       (let [test-result (atom {})
-            a (atom 0)]
+            a (atom 0)
+            c (atom 0)]
         (are [form expected] (match? expected
                                      (with-redefs [do-report (partial reset! test-result)]
                                        form
@@ -198,7 +208,18 @@
           `{:type :fail, :expected (~'= 0 1), :actual ~'(not (= 0 1))}
 
           (sut/expect (swap! a inc) :to-change @a :from 1 :to 3 :with =)
-          `{:type :fail, :expected (~'= (~'clojure.core/deref ~'a) 3), :actual ~'(not (= 2 3))}))))
+          `{:type :fail, :expected (~'= (~'clojure.core/deref ~'a) 3), :actual ~'(not (= 2 3))}
+
+          ;; change matcher to `match?`
+          (sut/expect 0 :to-change 0 :from 0 :to 1 :with match?)
+          `{:type :fail
+            :expected (~'match? 0 1)
+            :actual ~(matcher-combinators.model/->Mismatch 0 1)}
+
+          (sut/expect (swap! c inc) :to-change @c :from 0 :to 2 :with match?)
+          `{:type :fail
+            :expected (~'match? (~'clojure.core/deref ~'c) 2)
+            :actual ~(matcher-combinators.model/->Mismatch 1 2)}))))
 
   #?(:clj
      (when *assert*
