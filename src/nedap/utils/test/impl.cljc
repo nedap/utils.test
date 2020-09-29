@@ -64,22 +64,26 @@
      (defmethod cljs.test/report [::exit-code-reporter :end-run-tests] [summary]
        (set-exit-code-for! summary js/process))))
 
+(defmulti expect-matcher (fn [pred _ns] pred))
+(defmethod expect-matcher :default [pred ns] {:assert-expr pred :pred (ns-resolve ns pred)})
+
 (defn expect
-  [bodies {:keys [to-change from to] :as opts} clj?]
+  [bodies {:keys [to-change from to with] :as opts} clj? ns]
   {:pre [(spec/valid? boolean? clj?)]}
   (assert (seq bodies) "bodies can't be empty")
-  (assert (= #{:to-change :from :to} (set (keys opts))) (pr-str opts))
-  (assert (not (meta= [from to]))
-          (binding [*print-meta* true]
-            (str (pr-str from) " should be different from " (pr-str to))))
-  (assert (some? to-change) (pr-str to-change))
+  (assert (= #{:to-change :from :to} (set (keys (dissoc opts :with)))) (pr-str opts))
+  (let [{:keys [pred assert-expr]} (expect-matcher with ns)
+        is (if clj? 'clojure.test/is 'cljs.test/is)]
+    (assert (not (pred from to))
+            (binding [*print-meta* true]
+              (str (pr-str from) " should not match " (pr-str to))))
+    (assert (some? to-change) (pr-str to-change))
 
-  (let [is (if clj? 'clojure.test/is 'cljs.test/is)]
     `(do
        (let [to-change# ~to-change
              from# ~from]
-         (assert (meta= [to-change# from#])
+         (assert (~pred to-change# from#)
                  (binding [*print-meta* true]
                    (str (pr-str to-change#) " does not match expected from: " (pr-str from#)))))
        ~@bodies
-       (~is (meta= [~to-change ~to])))))
+       (~is (~assert-expr ~to-change ~to)))))

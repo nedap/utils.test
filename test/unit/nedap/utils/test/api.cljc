@@ -168,13 +168,13 @@
                                        form
                                        @test-result))
           (sut/expect 0 :to-change 0 :from 0 :to 1)
-          `{:type :fail, :expected (impl/meta= [0 1]), :actual (~'not (impl/meta= [0 1]))}
+          `{:type :fail, :expected (sut/meta= 0 1), :actual (~'not (sut/meta= 0 1))}
 
           (sut/expect 0 :to-change {} :from {} :to ^::test {})
-          `{:type :fail, :expected (impl/meta= [{} {}]), :actual (~'not (impl/meta= [{} {}]))}
+          `{:type :fail, :expected (sut/meta= {} {}), :actual (~'not (sut/meta= {} {}))}
 
           (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
-          `{:type :fail, :expected (impl/meta= [(deref ~'a) 2]), :actual (~'not (impl/meta= [1 2]))}))))
+          `{:type :fail, :expected (sut/meta= (deref ~'a) 2), :actual (~'not (sut/meta= 1 2))}))))
 
   #?(:clj
      (when *assert*
@@ -202,10 +202,13 @@
                "#{:to-change :from :to}"
                `(sut/expect () :unexpected () :signature 4 :keys)
 
-               "0 should be different from 0"
+               "0 should not match 0"
                `(sut/expect () :to-change 0 :from 0 :to 0)
 
-               "^#:unit.nedap.utils.test.api{:wat true} {} should be different from ^#:unit.nedap.utils.test.api{:wat true} {}"
+               "0 should not match 0"
+               `(sut/expect () :with ~'= :to-change 0 :from 0 :to 0)
+
+               "^#:unit.nedap.utils.test.api{:wat true} {} should not match ^#:unit.nedap.utils.test.api{:wat true} {}"
                `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})))
 
            (testing "asserts at least one body"
