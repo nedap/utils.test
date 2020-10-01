@@ -5,6 +5,7 @@
    [matcher-combinators.matchers :as matchers]
    [matcher-combinators.test :refer [match?]]
    [nedap.utils.test.api :as sut]
+   [nedap.utils.test.impl :as impl]
    [nedap.utils.test.matchers])
   #?(:clj (:import (clojure.lang ExceptionInfo Compiler$CompilerException))))
 
@@ -212,14 +213,30 @@
 
           ;; change matcher to `match?`
           (sut/expect 0 :to-change 0 :from 0 :to 1 :with match?)
-          `{:type :fail
-            :expected (~'match? 0 1)
-            :actual ~(matcher-combinators.model/->Mismatch 0 1)}
+          #?(:clj
+             `{:type :fail,
+               :expected (~'match? 0 1),
+               :actual {:summary (~'not (~'matcher-combinators.clj-test/match? 0 1))
+                        :match-result {:matcher-combinators.result/type :mismatch
+                                       :matcher-combinators.result/value {:expected 0 :actual 1}
+                                       :matcher-combinators.result/weight 1}}}
+             :cljs
+             `{:type :matcher-combinators/mismatch
+               :expected (~'match? 0 1)
+               :actual (~'not (~'matcher-combinators.cljs-test/match? 0 1))})
 
           (sut/expect (swap! c inc) :to-change @c :from 0 :to 2 :with match?)
-          `{:type :fail
-            :expected (~'match? (~'clojure.core/deref ~'c) 2)
-            :actual ~(matcher-combinators.model/->Mismatch 1 2)}))))
+          #?(:clj
+             `{:type :fail,
+               :expected (~'match? (clojure.core/deref ~'c) 2),
+               :actual {:summary (~'not (~'matcher-combinators.clj-test/match? 1 2)),
+                        :match-result {:matcher-combinators.result/type :mismatch,
+                                       :matcher-combinators.result/value {:expected 1, :actual 2},
+                                       :matcher-combinators.result/weight 1}}}
+             :cljs
+             `{:type :matcher-combinators/mismatch
+               :expected (~'match? (~'clojure.core/deref ~'c) 2)
+               :actual (~'not (~'matcher-combinators.cljs-test/match? 1 2))})))))
 
   #?(:clj
      (when *assert*
