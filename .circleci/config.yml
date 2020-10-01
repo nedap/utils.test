@@ -9,7 +9,7 @@ commands:
             - v1-dependencies-{{ checksum "project.clj" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-      - run: lein with-profile -dev,+test,+ci deps
+      - run: lein with-profile -dev,+test,+ci,+ncrw deps
       - save_cache:
           paths:
             - ~/.m2
@@ -87,7 +87,7 @@ jobs:
           command: echo -e "$GPG_KEY_V2" | gpg --import
       - run:
           name: Perform pre-release sanity check
-          command: lein with-profile -dev,+ci run -m nedap.ci.release-workflow.api sanity-check
+          command: lein with-profile -dev,+ci,+ncrw run -m nedap.ci.release-workflow.api sanity-check
       - run:
           name: release to JFrog
           command: lein deploy
