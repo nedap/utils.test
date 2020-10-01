@@ -27,7 +27,7 @@
                                    :password :env/clojars_pass}}
   :target-path "target/%s"
 
-  :test-paths ["src" "test"]
+  :test-paths ["test"]
 
   :monkeypatch-clojure-test false
 
