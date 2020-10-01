@@ -42,7 +42,8 @@
     `(cljs.test/run-tests (cljs.test/empty-env ::impl/exit-code-reporter) ~@namespaces)))
 
 (defmacro expect
-  "Asserts (via `#'clojure.test/is`) that the expression denoted by `to-change` changes from `from`, to `to` using `with`.
+  "Asserts (via `#'clojure.test/is`) that the expression denoted by `to-change` changes from `from`, to `to`.
+   The equality comparator can be overridden with `with`.`.
 
   `(expect (swap! a inc) :to-change @a :from 1 :to 2)`"
   [& forms]
@@ -53,6 +54,11 @@
                      (reduce (fn [memo [v k]]
                                (assoc memo k v)) {}))
         bodies  (drop-last (* 2 (count options)) forms)
-        defaults {:with `meta=}
+        defaults {:with 'meta=}
         clj?    (-> &env :ns nil?)]
-    (impl/expect bodies (merge defaults options) clj? *ns*)))
+    (impl/expect bodies (merge defaults options) clj?)))
+
+(defmethod impl/expect-matcher 'meta= [_]
+  {:assert-expr-sym `meta=
+   :pred-sym `meta=
+   :pred meta=})

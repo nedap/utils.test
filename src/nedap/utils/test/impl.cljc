@@ -65,21 +65,28 @@
        (set-exit-code-for! summary js/process))))
 
 (defmulti expect-matcher
-  "Given a symbol + ns returns :assert-expr and :pred.
+          "Given a symbol returns :assert-expr-sym, :pred-sym and :pred.
 
-  `#'expect` uses `pred` is to compare values in assertions: `(not (pred from, to)`, `(pred from to-change).
-  assert-expr is the symbol used to construct the `is` form, which allows error-reporting such as "
-  (fn [sym _ns] sym))
+           - `:assert-expr-sym` is used to construct the `is` form to preserve clojure.tes/assert-expr behaviour.
+           - `:pred` is used to assert validity on compile time.
+           - `:pred-sym` is used to assert validity on runtime.
 
-(defmethod expect-matcher :default [sym ns] {:assert-expr sym :pred (ns-resolve ns sym)})
+           These nuances exist for interoperability between clj and cljs runtime."
+          identity)
+
+(defmethod expect-matcher '= [_]
+  {:assert-expr-sym '=
+   :pred-sym `=
+   :pred =})
 
 (defn expect
-  [bodies {:keys [to-change from to with] :as opts} clj? ns]
+  [bodies {:keys [to-change from to with] :as opts} clj?]
   {:pre [(spec/valid? boolean? clj?)]}
   (assert (seq bodies) "bodies can't be empty")
   (assert (= #{:to-change :from :to} (set (keys (dissoc opts :with)))) (pr-str opts))
-  (let [{:keys [pred assert-expr]} (expect-matcher with ns)
+  (let [{:keys [pred-sym pred assert-expr-sym]} (expect-matcher with)
         is (if clj? 'clojure.test/is 'cljs.test/is)]
+    (assert (every? some? [pred-sym pred assert-expr-sym]))
     (assert (not (pred from to))
             (binding [*print-meta* true]
               (str (pr-str from) " should not match " (pr-str to))))
@@ -88,8 +95,8 @@
     `(do
        (let [to-change# ~to-change
              from# ~from]
-         (assert (~pred to-change# from#)
+         (assert (~pred-sym to-change# from#)
                  (binding [*print-meta* true]
                    (str (pr-str to-change#) " does not match expected from: " (pr-str from#)))))
        ~@bodies
-       (~is (~assert-expr ~to-change ~to)))))
+       (~is (~assert-expr-sym ~to-change ~to)))))

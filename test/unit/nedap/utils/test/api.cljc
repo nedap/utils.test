@@ -1,7 +1,6 @@
 (ns unit.nedap.utils.test.api
   (:require
-   #?(:clj [clojure.test :refer [do-report run-tests deftest testing are is use-fixtures]]
-      :cljs [cljs.test :refer-macros [deftest testing is are run-tests] :refer [use-fixtures do-report]])
+   #?(:clj [clojure.test :refer [do-report run-tests deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are run-tests] :refer [use-fixtures do-report]])
    [clojure.string :as string]
    [matcher-combinators.test :refer [match?]]
    [nedap.utils.test.api :as sut]
@@ -133,10 +132,10 @@
   (testing ":with `clojure.test/=`"
     (let [a (atom 0)]
       (sut/expect (swap! a inc)
-                  :with =
                   :to-change @a
                   :from 0
-                  :to 1)))
+                  :to 1
+                  :with =)))
 
   (testing "the macroexpansion evaluation"
     (let [proof (atom [])]
@@ -186,10 +185,10 @@
           `{:type :fail, :expected (sut/meta= (deref ~'a) 2), :actual (~'not (sut/meta= 1 2))}
 
            ;; change matcher to `=`
-          (sut/expect 0 :with = :to-change 0 :from 0 :to 1)
-          `{:type :fail, :expected (~'= 0 1), :actual (~'not (~'= 0 1))}
+          (sut/expect 0 :to-change 0 :from 0 :to 1 :with =)
+          `{:type :fail, :expected (~'= 0 1), :actual ~'(not (= 0 1))}
 
-          (sut/expect (swap! a inc) :with = :to-change @a :from 1 :to 3)
+          (sut/expect (swap! a inc) :to-change @a :from 1 :to 3 :with =)
           `{:type :fail, :expected (~'= (deref ~'a) 3), :actual ~'(not (= 2 3))}))))
 
   #?(:clj
