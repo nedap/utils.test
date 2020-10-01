@@ -182,14 +182,14 @@
           `{:type :fail, :expected (sut/meta= {} {}), :actual (~'not (sut/meta= {} {}))}
 
           (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
-          `{:type :fail, :expected (sut/meta= (deref ~'a) 2), :actual (~'not (sut/meta= 1 2))}
+          `{:type :fail, :expected (sut/meta= (~'clojure.core/deref ~'a) 2), :actual (~'not (sut/meta= 1 2))}
 
            ;; change matcher to `=`
           (sut/expect 0 :to-change 0 :from 0 :to 1 :with =)
           `{:type :fail, :expected (~'= 0 1), :actual ~'(not (= 0 1))}
 
           (sut/expect (swap! a inc) :to-change @a :from 1 :to 3 :with =)
-          `{:type :fail, :expected (~'= (deref ~'a) 3), :actual ~'(not (= 2 3))}))))
+          `{:type :fail, :expected (~'= (~'clojure.core/deref ~'a) 3), :actual ~'(not (= 2 3))}))))
 
   #?(:clj
      (when *assert*

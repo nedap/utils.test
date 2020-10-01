@@ -78,12 +78,15 @@
                                                      com.google.code.findbugs/jsr305
                                                      com.google.errorprone/error_prone_annotations
                                                      org.clojure/tools.reader]]
+                                       [com.cognitect/transit-clj "0.8.313" #_"transitive"]
                                        [com.fasterxml.jackson.core/jackson-core "2.9.6" #_"transitive"]
+                                       [com.google.code.findbugs/jsr305 "3.0.2" #_"transitive"]
+                                       [com.google.errorprone/error_prone_annotations "2.1.3" #_"transitive"]
                                        [com.google.guava/guava "25.1-jre" #_"transitive"]
                                        [com.google.protobuf/protobuf-java "3.4.0" #_"transitive"]
-                                       [com.cognitect/transit-clj "0.8.313" #_"transitive"]
-                                       [com.google.errorprone/error_prone_annotations "2.1.3" #_"transitive"]
-                                       [com.google.code.findbugs/jsr305 "3.0.2" #_"transitive"]]}
+                                       [nubank/matcher-combinators "3.1.3"
+                                        :exclusions [org.clojure/spec.alpha
+                                                     commons-codec]]]}
 
              :check    {:global-vars  {*unchecked-math* :warn-on-boxed
                                        ;; avoid warnings that cannot affect production:
@@ -99,9 +102,7 @@
              :jdk11      {:dependencies [[javax.xml.bind/jaxb-api "2.3.1"]
                                          [org.glassfish.jaxb/jaxb-runtime "2.3.1"]]}
 
-             :test     {:dependencies [[com.nedap.staffing-solutions/matcher-combinators "1.1.0-alpha1"
-                                        :exclusions [commons-codec]]]
-                        :jvm-opts     ["-Dclojure.core.async.go-checking=true"
+             :test     {:jvm-opts     ["-Dclojure.core.async.go-checking=true"
                                        "-Duser.language=en-US"]}
 
              :ncrw       {:global-vars  {*assert* true} ;; `ci.release-workflow` relies on runtime assertions
