@@ -115,6 +115,15 @@
       (gensym)         nil
       [[1 (gensym) 2]] [[1 (gensym) 3]])))
 
+;; invalid expect-matchers for testing
+(defmethod impl/expect-matcher 'wrong-pred-sym [_]
+  {:pred =
+   :pred-sym "not-a-symbol",
+   :assert-expr-sym '=,})
+(defmethod impl/expect-matcher 'missing-pred [_]
+  {:pred-sym `=,
+   :assert-expr-sym '=})
+
 (deftest expect
   (let [a (atom 0)]
     (sut/expect (swap! a inc)
@@ -224,7 +233,16 @@
                `(sut/expect () :with ~'= :to-change 0 :from 0 :to 0)
 
                "^#:unit.nedap.utils.test.api{:wat true} {} should not match ^#:unit.nedap.utils.test.api{:wat true} {}"
-               `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})))
+               `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})
+
+               "No method in multimethod 'expect-matcher' for dispatch value: unknown"
+               `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'unknown)
+
+               "invalid :pred-sym registered for: wrong-pred-sym, got: \"not-a-symbol\""
+               `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'wrong-pred-sym)
+
+               "invalid :pred registered for: missing-pred, got: nil"
+               `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'missing-pred)))
 
            (testing "asserts at least one body"
              (is (assertion-thrown?

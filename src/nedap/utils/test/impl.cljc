@@ -86,7 +86,12 @@
   (assert (= #{:to-change :from :to} (set (keys (dissoc opts :with)))) (pr-str opts))
   (let [{:keys [pred-sym pred assert-expr-sym]} (expect-matcher with)
         is (if clj? 'clojure.test/is 'cljs.test/is)]
-    (assert (every? some? [pred-sym pred assert-expr-sym]))
+    (assert (ifn? pred)
+            (str "invalid :pred registered for: " with ", got: " (pr-str pred)))
+    (assert (qualified-symbol? pred-sym)
+            (str "invalid :pred-sym registered for: " with ", got: " (pr-str pred-sym)))
+    (assert (symbol? assert-expr-sym)
+            (str "invalid :assert-expr-sym registered for: " with ", got: " (pr-str assert-expr-sym)))
     (assert (not (pred from to))
             (binding [*print-meta* true]
               (str (pr-str from) " should not match " (pr-str to))))
