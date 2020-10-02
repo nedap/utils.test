@@ -100,8 +100,8 @@
     `(do
        (let [to-change# ~to-change
              from# ~from]
-         (assert (~pred-sym to-change# from#)
+         (assert (~pred-sym from# to-change#)
                  (binding [*print-meta* true]
                    (str (pr-str to-change#) " does not match expected from: " (pr-str from#)))))
        ~@bodies
-       (~is (~assert-expr-sym ~to-change ~to)))))
+       (~is (~assert-expr-sym ~to ~to-change)))))

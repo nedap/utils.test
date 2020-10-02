@@ -10,7 +10,7 @@
    (matcher-combinators/match this actual)))
 
 (defmethod impl/expect-matcher 'match? [_]
-  {:pred matches?
+  {:pred =
    :pred-sym `matches?
    :assert-expr-sym 'match?})
 
