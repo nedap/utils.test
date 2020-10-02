@@ -79,7 +79,7 @@
                                                      com.google.errorprone/error_prone_annotations
                                                      org.clojure/tools.reader]]
                                        [com.cognitect/transit-clj "0.8.313" #_"transitive"]
-                                       [com.fasterxml.jackson.core/jackson-core "2.9.6" #_"transitive"]
+                                       [com.fasterxml.jackson.core/jackson-core "2.10.3" #_"transitive"]
                                        [com.google.code.findbugs/jsr305 "3.0.2" #_"transitive"]
                                        [com.google.errorprone/error_prone_annotations "2.1.3" #_"transitive"]
                                        [com.google.guava/guava "25.1-jre" #_"transitive"]
