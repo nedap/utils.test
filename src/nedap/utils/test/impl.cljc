@@ -111,9 +111,9 @@
     `(do
        (let [to-change# ~to-change
              from# ~from]
-         (assert (~pred-sym to-change# from#)
+         (assert (~pred-sym from# to-change#)
                  (binding [*print-meta* true]
                    (~(if clj? 'clojure.core/format 'goog.string/format)
-                    ~pred-sym-failure (pr-str to-change#) (pr-str from#)))))
+                    ~pred-sym-failure (pr-str from#) (pr-str to-change#)))))
        ~@bodies
-       (~is (~assert-expr-sym ~to-change ~to)))))
+       (~is (~assert-expr-sym ~to ~to-change)))))
