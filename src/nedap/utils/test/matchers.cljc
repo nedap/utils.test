@@ -58,8 +58,27 @@
                                                       :actual   actual}))
            result)))))
 
-(defn in-any-order [expected & {:keys [timeout]
-                                :or {timeout 5000}}]
-  #?(:clj (map->InAnyOrder {:expected expected
-                            :timeout  timeout})
-     :cljs (matchers/in-any-order expected)))
+#?(:clj
+   (defn in-any-order
+      "Matcher that will match when the given a list that is the same as the
+       `expected` list but with elements in a different order.
+
+       cancels evaluation when `:timeout` is reached (default 5000ms).
+
+       drop-in replacement for #'matcher-combinators.matchers/in-any-order"
+      [expected & {:keys [timeout]
+                   :or {timeout 5000}}]
+      #?(:clj (map->InAnyOrder {:expected expected
+                                :timeout  timeout})
+         :cljs (matchers/in-any-order expected)))
+
+   :cljs
+   (defn in-any-order
+     "Matcher that will match when the given a list that is the same as the
+     `expected` list but with elements in a different order.
+
+     Similar to Midje's `(just expected :in-any-order)`.
+
+     equal to #'matcher-combinators.matchers/in-any-order"
+     [expected & {}]
+     (matchers/in-any-order expected)))
