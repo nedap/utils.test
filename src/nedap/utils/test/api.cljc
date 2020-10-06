@@ -59,7 +59,7 @@
     (impl/expect bodies (merge defaults options) clj?)))
 
 (defmethod impl/expect-matcher 'meta= [_]
-  {:pred-sym-failure "`to-change` does not equal `to`: (not (meta= %s %s))"
+  {:pred-sym-failure "`to-change` does not equal `from`: (not (meta= %s %s))"
    :pred-failure "`from` is not allowed to equal `to`: %s"
    :assert-expr-sym `meta=
    :pred-sym `meta=

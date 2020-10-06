@@ -257,10 +257,10 @@
                "invalid :pred registered for: missing-pred, got: nil"
                `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'missing-pred)
 
-               "`to-change` does not equal `to`: (not (meta= 0 1))"
+               "`to-change` does not equal `from`: (not (meta= 0 1))"
                `(sut/expect () :to-change 0 :from 1 :to 2)
 
-               "`to-change` does not equal `to`: (not (= 0 1))"
+               "`to-change` does not equal `from`: (not (= 0 1))"
                `(sut/expect () :to-change 0 :from 1 :to 2 :with ~'=)))
 
            (testing "asserts at least one body"

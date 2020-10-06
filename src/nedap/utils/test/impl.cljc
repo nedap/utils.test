@@ -78,7 +78,7 @@
           identity)
 
 (defmethod expect-matcher '= [_]
-  {:pred-sym-failure "`to-change` does not equal `to`: (not (= %s %s))"
+  {:pred-sym-failure "`to-change` does not equal `from`: (not (= %s %s))"
    :pred-failure "`from` is not allowed to equal `to`: %s"
    :assert-expr-sym '=
    :pred-sym `=
