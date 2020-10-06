@@ -119,9 +119,19 @@
 (defmethod impl/expect-matcher 'wrong-pred-sym [_]
   {:pred =
    :pred-sym "not-a-symbol",
+   :pred-sym-failure "fail"
+   :pred-failure "fail"
    :assert-expr-sym '=,})
 (defmethod impl/expect-matcher 'missing-pred [_]
   {:pred-sym `=,
+   :pred-sym-failure "fail"
+   :pred-failure "fail"
+   :assert-expr-sym '=})
+(defmethod impl/expect-matcher 'custom-failure [_]
+  {:pred =
+   :pred-sym `=,
+   :pred-sym-failure "My custom failure!"
+   :pred-failure "My other custom failure!"
    :assert-expr-sym '=})
 
 (deftest expect
@@ -207,9 +217,9 @@
                    (try
                      (eval form)
                      false
-                     (catch Compiler$CompilerException e
-                       (or (string/includes? (ex-message (ex-cause e)) assertion)
-                           (throw (ex-cause e))))))]
+                     (catch Throwable e
+                       (or (string/includes? (ex-message (clojure.stacktrace/root-cause e)) assertion)
+                           (throw (clojure.stacktrace/root-cause e))))))]
 
            (testing "asserts correct options"
              (are [failure form] (assertion-thrown? failure form)
@@ -226,14 +236,17 @@
                "#{:to-change :from :to}"
                `(sut/expect () :unexpected () :signature 4 :keys)
 
-               "0 should not match 0"
+               "`from` is not allowed to equal `to`: 0"
                `(sut/expect () :to-change 0 :from 0 :to 0)
 
-               "0 should not match 0"
+               "`from` is not allowed to equal `to`: 0"
                `(sut/expect () :with ~'= :to-change 0 :from 0 :to 0)
 
-               "^#:unit.nedap.utils.test.api{:wat true} {} should not match ^#:unit.nedap.utils.test.api{:wat true} {}"
+               "`from` is not allowed to equal `to`: ^#:unit.nedap.utils.test.api{:wat true} {}"
                `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})
+
+               "My other custom failure!"
+               `(sut/expect () :to-change 0 :from 0 :to 0 :with ~'custom-failure)
 
                "No method in multimethod 'expect-matcher' for dispatch value: unknown"
                `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'unknown)
@@ -242,7 +255,13 @@
                `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'wrong-pred-sym)
 
                "invalid :pred registered for: missing-pred, got: nil"
-               `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'missing-pred)))
+               `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'missing-pred)
+
+               "`to-change` does not equal `to`: (not (meta= 0 1))"
+               `(sut/expect () :to-change 0 :from 1 :to 2)
+
+               "`to-change` does not equal `to`: (not (= 0 1))"
+               `(sut/expect () :to-change 0 :from 1 :to 2 :with ~'=)))
 
            (testing "asserts at least one body"
              (is (assertion-thrown?

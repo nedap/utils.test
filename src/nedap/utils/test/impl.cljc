@@ -1,6 +1,7 @@
 (ns nedap.utils.test.impl
   (:require
    #?(:clj [clojure.test] :cljs [cljs.test])
+   #?@(:cljs [[goog.string :as gstring] [goog.string.format]])
    [clojure.spec.alpha :as spec]
    [clojure.string :as string]
    [clojure.walk :as walk])
@@ -70,12 +71,16 @@
            - `:assert-expr-sym` is used to construct the `is` form to preserve clojure.tes/assert-expr behaviour.
            - `:pred` is used to assert validity on compile time.
            - `:pred-sym` is used to assert validity on runtime.
+           - `:pred-sym-failure` message format used when pred-sym assert fails
+           - `:pred-failure` message format used when pred assert fails
 
            These nuances exist for interoperability between clj and cljs runtime."
           identity)
 
 (defmethod expect-matcher '= [_]
-  {:assert-expr-sym '=
+  {:pred-sym-failure "`to-change` does not equal `to`: (not (= %s %s))"
+   :pred-failure "`from` is not allowed to equal `to`: %s"
+   :assert-expr-sym '=
    :pred-sym `=
    :pred =})
 
@@ -84,17 +89,23 @@
   {:pre [(spec/valid? boolean? clj?)]}
   (assert (seq bodies) "bodies can't be empty")
   (assert (= #{:to-change :from :to} (set (keys (dissoc opts :with)))) (pr-str opts))
-  (let [{:keys [pred-sym pred assert-expr-sym]} (expect-matcher with)
+  (let [{:keys [pred-sym pred assert-expr-sym pred-sym-failure pred-failure]} (expect-matcher with)
         is (if clj? 'clojure.test/is 'cljs.test/is)]
-    (assert (ifn? pred)
+    (assert (fn? pred)
             (str "invalid :pred registered for: " with ", got: " (pr-str pred)))
+    (assert (string? pred-failure)
+            (str "invalid :pred-failure registered for: " with ", got: " (pr-str pred-failure)))
     (assert (qualified-symbol? pred-sym)
             (str "invalid :pred-sym registered for: " with ", got: " (pr-str pred-sym)))
+    (assert (string? pred-sym-failure)
+            (str "invalid :pred-sym-failure registered for: " with ", got: " (pr-str assert-expr-sym)))
     (assert (symbol? assert-expr-sym)
             (str "invalid :assert-expr-sym registered for: " with ", got: " (pr-str assert-expr-sym)))
     (assert (not (pred from to))
             (binding [*print-meta* true]
-              (str (pr-str from) " should not match " (pr-str to))))
+              (#?(:clj format
+                  :cljs goog.string/format)
+               pred-failure (pr-str from) (pr-str to))))
     (assert (some? to-change) (pr-str to-change))
 
     `(do
@@ -102,6 +113,7 @@
              from# ~from]
          (assert (~pred-sym to-change# from#)
                  (binding [*print-meta* true]
-                   (str (pr-str to-change#) " does not match expected from: " (pr-str from#)))))
+                   (~(if clj? 'clojure.core/format 'goog.string/format)
+                    ~pred-sym-failure (pr-str to-change#) (pr-str from#)))))
        ~@bodies
        (~is (~assert-expr-sym ~to-change ~to)))))
