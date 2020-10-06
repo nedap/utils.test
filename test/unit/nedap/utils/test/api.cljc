@@ -3,8 +3,8 @@
    #?(:clj [clojure.test :refer [do-report run-tests deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are run-tests] :refer [use-fixtures do-report]])
    [clojure.string :as string]
    [matcher-combinators.test :refer [match?]]
-   [nedap.utils.test.impl :as impl]
-   [nedap.utils.test.api :as sut])
+   [nedap.utils.test.api :as sut]
+   [nedap.utils.test.impl :as impl])
   #?(:clj (:import (clojure.lang ExceptionInfo Compiler$CompilerException))))
 
 (defrecord Student  [name])
@@ -115,6 +115,25 @@
       (gensym)         nil
       [[1 (gensym) 2]] [[1 (gensym) 3]])))
 
+;; invalid expect-matchers for testing
+(defmethod impl/expect-matcher 'wrong-pred-sym [_]
+  {:pred =
+   :pred-sym "not-a-symbol",
+   :pred-sym-failure "fail"
+   :pred-failure "fail"
+   :assert-expr-sym '=,})
+(defmethod impl/expect-matcher 'missing-pred [_]
+  {:pred-sym `=,
+   :pred-sym-failure "fail"
+   :pred-failure "fail"
+   :assert-expr-sym '=})
+(defmethod impl/expect-matcher 'custom-failure [_]
+  {:pred =
+   :pred-sym `=,
+   :pred-sym-failure "My custom failure!"
+   :pred-failure "My other custom failure!"
+   :assert-expr-sym '=})
+
 (deftest expect
   (let [a (atom 0)]
     (sut/expect (swap! a inc)
@@ -128,6 +147,14 @@
                   :to-change @a
                   :from 1
                   :to 3)))
+
+  (testing ":with `clojure.test/=`"
+    (let [a (atom 0)]
+      (sut/expect (swap! a inc)
+                  :to-change @a
+                  :from 0
+                  :to 1
+                  :with =)))
 
   (testing "the macroexpansion evaluation"
     (let [proof (atom [])]
@@ -168,13 +195,20 @@
                                        form
                                        @test-result))
           (sut/expect 0 :to-change 0 :from 0 :to 1)
-          `{:type :fail, :expected (impl/meta= [0 1]), :actual (~'not (impl/meta= [0 1]))}
+          `{:type :fail, :expected (sut/meta= 0 1), :actual (~'not (sut/meta= 0 1))}
 
           (sut/expect 0 :to-change {} :from {} :to ^::test {})
-          `{:type :fail, :expected (impl/meta= [{} {}]), :actual (~'not (impl/meta= [{} {}]))}
+          `{:type :fail, :expected (sut/meta= {} {}), :actual (~'not (sut/meta= {} {}))}
 
           (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
-          `{:type :fail, :expected (impl/meta= [(deref ~'a) 2]), :actual (~'not (impl/meta= [1 2]))}))))
+          `{:type :fail, :expected (sut/meta= (~'clojure.core/deref ~'a) 2), :actual (~'not (sut/meta= 1 2))}
+
+           ;; change matcher to `=`
+          (sut/expect 0 :to-change 0 :from 0 :to 1 :with =)
+          `{:type :fail, :expected (~'= 0 1), :actual ~'(not (= 0 1))}
+
+          (sut/expect (swap! a inc) :to-change @a :from 1 :to 3 :with =)
+          `{:type :fail, :expected (~'= (~'clojure.core/deref ~'a) 3), :actual ~'(not (= 2 3))}))))
 
   #?(:clj
      (when *assert*
@@ -183,9 +217,9 @@
                    (try
                      (eval form)
                      false
-                     (catch Compiler$CompilerException e
-                       (or (string/includes? (ex-message (ex-cause e)) assertion)
-                           (throw (ex-cause e))))))]
+                     (catch Throwable e
+                       (or (string/includes? (ex-message (clojure.stacktrace/root-cause e)) assertion)
+                           (throw (clojure.stacktrace/root-cause e))))))]
 
            (testing "asserts correct options"
              (are [failure form] (assertion-thrown? failure form)
@@ -202,11 +236,32 @@
                "#{:to-change :from :to}"
                `(sut/expect () :unexpected () :signature 4 :keys)
 
-               "0 should be different from 0"
+               "`from` is not allowed to equal `to`: 0"
                `(sut/expect () :to-change 0 :from 0 :to 0)
 
-               "^#:unit.nedap.utils.test.api{:wat true} {} should be different from ^#:unit.nedap.utils.test.api{:wat true} {}"
-               `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})))
+               "`from` is not allowed to equal `to`: 0"
+               `(sut/expect () :with ~'= :to-change 0 :from 0 :to 0)
+
+               "`from` is not allowed to equal `to`: ^#:unit.nedap.utils.test.api{:wat true} {}"
+               `(sut/expect () :to-change 0 :from ^::wat {} :to ^::wat {})
+
+               "My other custom failure!"
+               `(sut/expect () :to-change 0 :from 0 :to 0 :with ~'custom-failure)
+
+               "No method in multimethod 'expect-matcher' for dispatch value: unknown"
+               `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'unknown)
+
+               "invalid :pred-sym registered for: wrong-pred-sym, got: \"not-a-symbol\""
+               `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'wrong-pred-sym)
+
+               "invalid :pred registered for: missing-pred, got: nil"
+               `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'missing-pred)
+
+               "`to-change` does not equal `from`: (not (meta= 0 1))"
+               `(sut/expect () :to-change 0 :from 1 :to 2)
+
+               "`to-change` does not equal `from`: (not (= 0 1))"
+               `(sut/expect () :to-change 0 :from 1 :to 2 :with ~'=)))
 
            (testing "asserts at least one body"
              (is (assertion-thrown?
