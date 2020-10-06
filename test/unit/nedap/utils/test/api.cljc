@@ -2,9 +2,11 @@
   (:require
    #?(:clj [clojure.test :refer [do-report run-tests deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are run-tests] :refer [use-fixtures do-report]])
    [clojure.string :as string]
+   [matcher-combinators.matchers :as matchers]
    [matcher-combinators.test :refer [match?]]
    [nedap.utils.test.api :as sut]
-   [nedap.utils.test.impl :as impl])
+   [nedap.utils.test.impl :as impl]
+   [nedap.utils.test.matchers])
   #?(:clj (:import (clojure.lang ExceptionInfo Compiler$CompilerException))))
 
 (defrecord Student  [name])
@@ -156,6 +158,21 @@
                   :to 1
                   :with =)))
 
+  (testing ":with match?"
+    (let [a (atom {::key ::value
+                   ::other-key ::other-value})]
+      (sut/expect (swap! a assoc ::key ::new-value)
+                  :to-change @a
+                  :from {::key ::value}
+                  :to {::key ::new-value}
+                  :with match?))
+    (let [a (atom [3 2 1])]
+      (sut/expect (reset! a [4 3 2 1])
+                  :to-change @a
+                  :from (matchers/in-any-order [1 2 3])
+                  :to (matchers/in-any-order [1 2 3 4])
+                  :with match?)))
+
   (testing "the macroexpansion evaluation"
     (let [proof (atom [])]
       (sut/expect
@@ -164,7 +181,7 @@
        :from      (do (swap! proof conj :from)      true)
        :to        (do (swap! proof conj :to)        true))
 
-      (is (= [:to-change :from :body :to-change :to]
+      (is (= [:to-change :from :body :to :to-change]
              @proof))))
 
   (testing "possible to test metadata"
@@ -189,26 +206,54 @@
            :cljs true)
     (testing ":to failures"
       (let [test-result (atom {})
-            a (atom 0)]
+            a (atom 0)
+            c (atom 0)]
         (are [form expected] (match? expected
                                      (with-redefs [do-report (partial reset! test-result)]
                                        form
                                        @test-result))
           (sut/expect 0 :to-change 0 :from 0 :to 1)
-          `{:type :fail, :expected (sut/meta= 0 1), :actual (~'not (sut/meta= 0 1))}
+          `{:type :fail, :expected (sut/meta= 1 0), :actual (~'not (sut/meta= 1 0))}
 
           (sut/expect 0 :to-change {} :from {} :to ^::test {})
           `{:type :fail, :expected (sut/meta= {} {}), :actual (~'not (sut/meta= {} {}))}
 
           (sut/expect (swap! a inc) :to-change @a :from 0 :to 2)
-          `{:type :fail, :expected (sut/meta= (~'clojure.core/deref ~'a) 2), :actual (~'not (sut/meta= 1 2))}
+          `{:type :fail, :expected (sut/meta= 2 (~'clojure.core/deref ~'a)), :actual (~'not (sut/meta= 2 1))}
 
            ;; change matcher to `=`
           (sut/expect 0 :to-change 0 :from 0 :to 1 :with =)
-          `{:type :fail, :expected (~'= 0 1), :actual ~'(not (= 0 1))}
+          `{:type :fail, :expected (~'= 1 0), :actual ~'(not (= 1 0))}
 
           (sut/expect (swap! a inc) :to-change @a :from 1 :to 3 :with =)
-          `{:type :fail, :expected (~'= (~'clojure.core/deref ~'a) 3), :actual ~'(not (= 2 3))}))))
+          `{:type :fail, :expected (~'= 3 (~'clojure.core/deref ~'a)), :actual ~'(not (= 3 2))}
+
+          ;; change matcher to `match?`
+          (sut/expect 0 :to-change 0 :from 0 :to 1 :with match?)
+          #?(:clj
+             `{:type :fail,
+               :expected (~'match? 1 0),
+               :actual {:summary (~'not (~'matcher-combinators.clj-test/match? 1 0))
+                        :match-result {:matcher-combinators.result/type :mismatch
+                                       :matcher-combinators.result/value {:expected 1 :actual 0}
+                                       :matcher-combinators.result/weight 1}}}
+             :cljs
+             `{:type :matcher-combinators/mismatch
+               :expected (~'match? 1 0)
+               :actual (~'not (~'matcher-combinators.cljs-test/match? 1 0))})
+
+          (sut/expect (swap! c inc) :to-change @c :from 0 :to 2 :with match?)
+          #?(:clj
+             `{:type :fail,
+               :expected (~'match? 2 (clojure.core/deref ~'c)),
+               :actual {:summary (~'not (~'matcher-combinators.clj-test/match? 2 1)),
+                        :match-result {:matcher-combinators.result/type :mismatch,
+                                       :matcher-combinators.result/value {:expected 2, :actual 1},
+                                       :matcher-combinators.result/weight 1}}}
+             :cljs
+             `{:type :matcher-combinators/mismatch
+               :expected (~'match? 2 (~'clojure.core/deref ~'c))
+               :actual (~'not (~'matcher-combinators.cljs-test/match? 2 1))})))))
 
   #?(:clj
      (when *assert*
@@ -257,11 +302,17 @@
                "invalid :pred registered for: missing-pred, got: nil"
                `(sut/expect () :to-change 0 :from 0 :to 1 :with ~'missing-pred)
 
-               "`to-change` does not equal `from`: (not (meta= 0 1))"
+               "`to-change` does not equal `from`: (not (meta= 1 0))"
                `(sut/expect () :to-change 0 :from 1 :to 2)
 
-               "`to-change` does not equal `from`: (not (= 0 1))"
-               `(sut/expect () :to-change 0 :from 1 :to 2 :with ~'=)))
+               "`to-change` does not equal `from`: (not (= 1 0))"
+               `(sut/expect () :to-change 0 :from 1 :to 2 :with ~'=)
+
+               "`to-change` does not match? `to`: (not (match? #matcher_combinators.core.InAnyOrder{:expected [1 2]} [2]))"
+               `(sut/expect () :to-change [2] :from (matchers/in-any-order [1 2]) :to [2] :with ~'match?)
+
+               "`from` is not allowed to equal `to`: (matcher-combinators.matchers/in-any-order [1 2])"
+               `(sut/expect () :to-change [1] :from (matchers/in-any-order [1 2]) :to (matchers/in-any-order [1 2]) :with ~'match?)))
 
            (testing "asserts at least one body"
              (is (assertion-thrown?
