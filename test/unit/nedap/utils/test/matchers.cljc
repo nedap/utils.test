@@ -33,4 +33,11 @@
     'abc1234
     #::result{:type :match
               :weight 0
-              :value 'abc1234}))
+              :value 'abc1234}
+
+    (sut/gensym "abc")
+    'G__250234
+    #::result{:type   :mismatch
+              :weight 1
+              :value  (model/map->Mismatch {:actual   'G__250234
+                                            :expected "abc"})}))
