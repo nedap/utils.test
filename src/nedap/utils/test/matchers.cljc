@@ -3,6 +3,7 @@
   (:require
    [clojure.string :as string]
    [matcher-combinators.core :as matcher-combinators]
+   [matcher-combinators.matchers :as matchers]
    [matcher-combinators.model :as model]
    [matcher-combinators.result :as result]
    [nedap.utils.test.impl :as impl]))
@@ -41,3 +42,43 @@
   ([] (gensym "G__"))
   ([prefix-string]
    (map->Gensym {:expected prefix-string})))
+
+#?(:clj
+   (defrecord InAnyOrder [expected timeout]
+     matcher-combinators/Matcher
+     (-matcher-for [this] this)
+     (-matcher-for [this _] this)
+     (-match [_this actual]
+       (let [result (deref
+                     (future (matcher-combinators/match (matchers/in-any-order expected) actual))
+                     timeout
+                     ::timeout)]
+         (if (#{::timeout} result)
+           (throw (ex-info "in-any-order timed out", {:expected expected
+                                                      :actual   actual}))
+           result)))))
+
+#?(:clj
+   (defn in-any-order
+     "Matcher that will match when the given a list that is the same as the
+     `expected` list but with elements in a different order.
+
+     cancels evaluation when `:timeout` is reached (default 5000ms).
+
+     drop-in replacement for #'matcher-combinators.matchers/in-any-order"
+     [expected & {:keys [timeout]
+                  :or {timeout 5000}}]
+     #?(:clj (map->InAnyOrder {:expected expected
+                               :timeout  timeout})
+        :cljs (matchers/in-any-order expected)))
+
+   :cljs
+   (defn in-any-order
+     "Matcher that will match when the given a list that is the same as the
+     `expected` list but with elements in a different order.
+
+     Similar to Midje's `(just expected :in-any-order)`.
+
+     equal to #'matcher-combinators.matchers/in-any-order"
+     [expected & {}]
+     (matchers/in-any-order expected)))
