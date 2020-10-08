@@ -26,7 +26,7 @@
   (-matcher-for [this _] this)
   (-match [_this actual]
     (if (and (symbol? actual)
-             (= (str expected) (string/replace (str actual) #"(.?)(\d)*" "$1")))
+             (= (str expected) (string/replace (str actual) #"(.?)(\d)+" "$1")))
       {::result/type   :match
        ::result/value  actual
        ::result/weight 0}
