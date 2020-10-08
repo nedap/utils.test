@@ -1,8 +1,8 @@
 (ns integration.nedap.utils.test.matchers
   (:require
    #?(:clj [clojure.test :refer [deftest testing are is use-fixtures]] :cljs [cljs.test :refer-macros [deftest testing is are] :refer [use-fixtures]])
-   [matcher-combinators.standalone :as standalone]
    [matcher-combinators.model :as model]
+   [matcher-combinators.standalone :as standalone]
    [nedap.utils.test.matchers :as sut]))
 
 (deftest gensym-matcher
