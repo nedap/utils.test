@@ -308,7 +308,7 @@
                "`to-change` does not equal `from`: (not (= 1 0))"
                `(sut/expect () :to-change 0 :from 1 :to 2 :with ~'=)
 
-               "`to-change` does not match? `to`: (not (match? #matcher_combinators.core.InAnyOrder{:expected [1 2]} [2]))"
+               "`to-change` does not match? `from`: (not (match? #matcher_combinators.core.InAnyOrder{:expected [1 2]} [2]))"
                `(sut/expect () :to-change [2] :from (matchers/in-any-order [1 2]) :to [2] :with ~'match?)
 
                "`from` is not allowed to equal `to`: (matcher-combinators.matchers/in-any-order [1 2])"
