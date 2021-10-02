@@ -73,20 +73,19 @@
                         :source-paths ["dev"]
                         :repl-options {:init-ns dev}}
 
-             :provided {:dependencies [[org.clojure/clojurescript "1.10.597"
-                                        :exclusions [com.cognitect/transit-clj
-                                                     com.google.code.findbugs/jsr305
-                                                     com.google.errorprone/error_prone_annotations
-                                                     org.clojure/tools.reader]]
-                                       [com.cognitect/transit-clj "0.8.313" #_"transitive"]
-                                       [com.fasterxml.jackson.core/jackson-core "2.10.3" #_"transitive"]
-                                       [com.google.code.findbugs/jsr305 "3.0.2" #_"transitive"]
-                                       [com.google.errorprone/error_prone_annotations "2.1.3" #_"transitive"]
-                                       [com.google.guava/guava "25.1-jre" #_"transitive"]
-                                       [com.google.protobuf/protobuf-java "3.4.0" #_"transitive"]
-                                       [nubank/matcher-combinators "3.1.4"
-                                        :exclusions [org.clojure/spec.alpha
-                                                     commons-codec]]]}
+             :provided {:dependencies [[lambdaisland/kaocha "1.0.861"]
+                                       [nubank/matcher-combinators "3.1.4"]
+                                       [org.clojure/clojurescript "1.10.597"]]
+                        :managed-dependencies [[com.cognitect/transit-clj "0.8.313"]
+                                               [com.fasterxml.jackson.core/jackson-core "2.10.3"]
+                                               [com.google.code.findbugs/jsr305 "3.0.2"]
+                                               [com.google.errorprone/error_prone_annotations "2.1.3"]
+                                               [com.google.guava/guava "25.1-jre"]
+                                               [com.google.protobuf/protobuf-java "3.4.0"]
+                                               [commons-codec "1.11"]
+                                               [io.aviso/pretty "0.1.37"]
+                                               [org.clojure/spec.alpha "0.2.187"]
+                                               [org.clojure/tools.cli "1.0.194"]]}
 
              :check    {:global-vars  {*unchecked-math* :warn-on-boxed
                                        ;; avoid warnings that cannot affect production:
