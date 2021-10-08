@@ -105,8 +105,12 @@
              :test     {:jvm-opts     ["-Dclojure.core.async.go-checking=true"
                                        "-Duser.language=en-US"]}
 
-             :ncrw       {:global-vars  {*assert* true} ;; `ci.release-workflow` relies on runtime assertions
-                          :dependencies [[com.nedap.staffing-solutions/ci.release-workflow "1.11.0"]]}
+             :ncrw       {:global-vars    {*assert* true} ;; `ci.release-workflow` relies on runtime assertions
+                          :source-paths   ^:replace []
+                          :test-paths     ^:replace []
+                          :resource-paths ^:replace []
+                          :plugins        ^:replace []
+                          :dependencies   ^:replace [[com.nedap.staffing-solutions/ci.release-workflow "1.13.1"]]}
 
              :ci       {:pedantic?    :abort
                         :jvm-opts     ["-Dclojure.main.report=stderr"]}})
