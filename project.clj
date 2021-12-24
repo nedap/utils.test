@@ -1,5 +1,5 @@
 ;; Please don't bump the library version by hand - use ci.release-workflow instead.
-(defproject com.nedap.staffing-solutions/utils.test "1.8.0-alpha1"
+(defproject com.nedap.staffing-solutions/utils.test "1.8.0-alpha2"
   ;; Please keep the dependencies sorted a-z.
   :dependencies [[org.clojure/clojure "1.10.1"]]
 
