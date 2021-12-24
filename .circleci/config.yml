@@ -107,18 +107,12 @@ workflows:
           name: "Ensure artifact isolation, inform of boxed math"
           jdk_version: openjdk8
           lein_test_command: lein with-profile -dev,+check check
-          context:
-            - Github
           <<: *test_code_filters
       - cloverage:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
-          context:
-            - Github
           <<: *test_code_filters
       - test_cljs_code:
-          context:
-            - Github
           <<: *test_code_filters
       - test_code:
           name: "JDK 8, plain"
@@ -127,8 +121,6 @@ workflows:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - cloverage
-          context:
-            - Github
           <<: *test_code_filters
       - test_code:
           name: "JDK 8, with production-like compiler flags"
@@ -137,8 +129,6 @@ workflows:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - cloverage
-          context:
-            - Github
           <<: *test_code_filters
       - test_code:
           name: "JDK 11, plain"
@@ -147,8 +137,6 @@ workflows:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - cloverage
-          context:
-            - Github
           <<: *test_code_filters
       - test_code:
           name: "JDK 11, with production-like compiler flags"
@@ -157,8 +145,6 @@ workflows:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - cloverage
-          context:
-            - Github
           <<: *test_code_filters
       - deploy:
           context:
