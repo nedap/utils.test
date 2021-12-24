@@ -89,9 +89,6 @@ jobs:
           name: Perform pre-release sanity check
           command: lein with-profile -dev,+ci,+ncrw run -m nedap.ci.release-workflow.api sanity-check
       - run:
-          name: release to JFrog
-          command: lein deploy
-      - run:
           name: release to Clojars
           command: lein deploy clojars          
 
@@ -110,15 +107,12 @@ workflows:
           name: "Ensure artifact isolation, inform of boxed math"
           jdk_version: openjdk8
           lein_test_command: lein with-profile -dev,+check check
-          context: JFrog
           <<: *test_code_filters
       - cloverage:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
-          context: JFrog
           <<: *test_code_filters
       - test_cljs_code:
-          context: JFrog
           <<: *test_code_filters
       - test_code:
           name: "JDK 8, plain"
@@ -127,7 +121,6 @@ workflows:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - cloverage
-          context: JFrog
           <<: *test_code_filters
       - test_code:
           name: "JDK 8, with production-like compiler flags"
@@ -136,7 +129,6 @@ workflows:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - cloverage
-          context: JFrog
           <<: *test_code_filters
       - test_code:
           name: "JDK 11, plain"
@@ -145,7 +137,6 @@ workflows:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - cloverage
-          context: JFrog
           <<: *test_code_filters
       - test_code:
           name: "JDK 11, with production-like compiler flags"
@@ -154,10 +145,12 @@ workflows:
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - cloverage
-          context: JFrog
           <<: *test_code_filters
       - deploy:
-          context: JFrog
+          context:
+            - Clojars
+            - Github
+            - GPG
           requires:
             - "Ensure artifact isolation, inform of boxed math"
             - test_cljs_code
