@@ -12,6 +12,8 @@ A collection of test helpers.
 
 * `nedap.utils.test.api/expect` allows you to assert side effects in code. look at [examples in the tests](https://github.com/nedap/utils.test/blob/55021bf884fb06aa3cb9d2706ffe6816a2923e45/test/unit/nedap/utils/test/api.cljc#L119-L123).
 
+* `nedap.kacoha.focus-file-plugin` Kaocha plugin which adds `--focus-file` cli-option. Can be used to test a specific file rather than a specific file.
+
 ## Installation
 
 ```clojure
@@ -21,7 +23,8 @@ A collection of test helpers.
 ## ns organisation
 
  - `nedap.utils.test.api` 
- - `nedap.utils.test.matchers` matcher-combinators matchers
+ - `nedap.utils.test.matchers` [matcher-combinators](https://github.com/nubank/matcher-combinators) matchers
+ - `nedap.kaocha` [koacha](https://github.com/lambdaisland/kaocha) plugins
 
 ## Documentation
 
